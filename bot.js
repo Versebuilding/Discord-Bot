@@ -230,7 +230,7 @@ client.on('messageCreate', async msg =>
 
 	if (content == "") return;
 
-	await msg.react("<:timezone_react:981410395346595890>");
+	await msg.react("<:timezone_react:981448185128030208>");
 
 	const rfilter = (reaction, user) => {
 		//console.log(reaction, user, ('timezone_react' == reaction.emoji.name) && (user.id != client.user.id));
