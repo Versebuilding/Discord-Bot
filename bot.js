@@ -50,6 +50,7 @@ const weekdays = [
 function attemptTime(str)
 {
 	let dayadder = -1;
+	let houraddr = -7;
 	weekdays.forEach(function(d, i)
 	{
 		//console.log(`${str} vs ${d}`, str.startsWith(d + " "), str.endsWith(" " + d));
@@ -90,8 +91,8 @@ function attemptTime(str)
 	const datetarget = [
 		(atmp.year) ? atmp.year : current.getFullYear(),
 		(atmp.month) ? atmp.month - 1 : current.getMonth(),
-		(atmp.day) ? atmp.day : (current.getDate() + dayadder),
-		(atmp.hour) ? atmp.hour : current.getHours(),
+		(atmp.day) ? atmp.day : (current.getDate()),
+		((atmp.hour) ? atmp.hour : current.getHours()) + houraddr,
 		(atmp.minute) ? atmp.minute : 0, //current.getMinutes(),
 		(atmp.second) ? atmp.second : 0 //current.getSeconds()
 	];
