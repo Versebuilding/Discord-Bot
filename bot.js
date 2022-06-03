@@ -284,3 +284,15 @@ client.on('messageCreate', async msg =>
 });
 
 client.login(process.env.DISCORD_TOKEN);
+
+const http = require('http');
+const server = http.createServer((req, res) => {
+	res.statusCode = 200;
+	res.setHeader('Content-Type', 'text/plain');
+	res.end('Hello World');
+});
+var port = process.env.PORT || 3000;
+
+server.listen(port, "0.0.0.0", function() {
+	console.log("Listening on Port " + port);
+});
