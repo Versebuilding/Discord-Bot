@@ -292,14 +292,17 @@ var logbackup = console.log;
 
 console.log = function()
 {
-	var out;
-	for (let i = 0; i < arguments.length; i++)
+	var out = "";
+	if (arguments.length == 0) out = "\n";
+	else for (let i = 0; i < arguments.length; i++)
 	{
 		const str = JSON.stringify(arguments[i]);
 		out += str.substring(1, str.length - 1) + "\n";
 	}
 
-	logbackup.apply(arguments);
+	log += out;
+
+	logbackup(out);
 
 	const trimto = log.length - 6000;
 	if (trimto > 0)
