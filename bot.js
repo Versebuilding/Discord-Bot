@@ -83,7 +83,7 @@ function attemptTime(str)
 	});
 
 	const atmp = adp.attempt(str);
-	console.log("Attempting string: '" + str + "'...:", atmp);
+	//console.log("Attempting string: '" + str + "'...:", atmp);
 
 	if (!atmp || atmp.invalid) return null;
 
@@ -109,7 +109,7 @@ function attemptTime(str)
 	if (!atmp.hour && atmp.minute && (atmp.minute < current.getMinutes())) datetarget[3]++;
 	if (!atmp.minute && atmp.second && (atmp.second < current.getSeconds())) datetarget[4]++;
 
-	console.log(atmp.hour, current.getHours());
+	//console.log(atmp.hour, current.getHours());
 
 	const target = new Date(
 		datetarget[0],
@@ -120,7 +120,7 @@ function attemptTime(str)
 		datetarget[5],
 	);
 
-	console.log(current, target);
+	//console.log(current, target);
 
 	let format = "f";
 
@@ -156,7 +156,7 @@ function getTimes(str)
 		for (let i = 6; i > 0; i--) {
 			if (j + i > splt.length) continue;
 
-			console.log(`\nRunning [${j}-${j+i})`)
+			//console.log(`\nRunning [${j}-${j+i})`)
 			let comp = "";
 			for (let x = j; x < j + i; x++) comp += splt[x] + " ";
 			comp = comp.trim();
@@ -168,7 +168,7 @@ function getTimes(str)
 			if (time)
 			{
 				times.push({ "in": `${comp}`, "out": time });
-				console.log({ "in": comp, "out": time});
+				//console.log({ "in": comp, "out": time});
 
 				j += i;
 				i = 6;
@@ -253,11 +253,12 @@ client.on('messageCreate', async msg =>
 	msg.awaitReactions(
 		{ filter: rfilter, max: 1, time: 60000, errors: ['time'] }
 	).then(collected => {
+		console.log(`Reaction Recieved`);
 		msg.reply({ content: content});
 
 	}).catch(collected =>
 	{
-		console.log("Timeout!");
+		console.log("Reaction Timed Out!");
 		const userReactions = msg.reactions.cache.filter(reaction => reaction.users.cache.has(client.user.id));
 
 		try {
@@ -285,11 +286,33 @@ client.on('messageCreate', async msg =>
 
 client.login(process.env.DISCORD_TOKEN);
 
+
+var log = "## Beginning of log ##\n";
+var logbackup = console.log;
+
+console.log = function()
+{
+	var out;
+	for (let i = 0; i < arguments.length; i++)
+	{
+		const str = JSON.stringify(arguments[i]);
+		out += str.substring(1, str.length - 1) + "\n";
+	}
+
+	logbackup.apply(arguments);
+
+	const trimto = log.length - 6000;
+	if (trimto > 0)
+	{
+		log = log.substring(trimto, log.length);
+	}
+}
+
 const http = require('http');
 const server = http.createServer((req, res) => {
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'text/plain');
-	res.end('Hello World');
+	res.end(log);
 });
 var port = process.env.PORT || 3000;
 
