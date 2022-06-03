@@ -16,6 +16,12 @@ const commands = [
 		.addStringOption(option =>
 			option.setName('input')
 				.setDescription('The input to be parsed for times')
+				.setRequired(true)),
+	new SlashCommandBuilder().setName('listmembers')
+		.setDescription('Converts any times in given text into Discord timezone commands!')
+		.addRoleOption(option =>
+			option.setName('role')
+				.setDescription('The input to be parsed for times')
 				.setRequired(true))
 ]; 
 
@@ -50,7 +56,7 @@ const weekdays = [
 function attemptTime(str)
 {
 	let dayadder = -1;
-	let houraddr = -5;
+	let houraddr = 0;
 	weekdays.forEach(function(d, i)
 	{
 		//console.log(`${str} vs ${d}`, str.startsWith(d + " "), str.endsWith(" " + d));
@@ -91,7 +97,7 @@ function attemptTime(str)
 	const datetarget = [
 		(atmp.year) ? atmp.year : current.getFullYear(),
 		(atmp.month) ? atmp.month - 1 : current.getMonth(),
-		(atmp.day) ? atmp.day : (current.getDate()),
+		(atmp.day) ? atmp.day : (current.getDate() + dayadder),
 		((atmp.hour) ? atmp.hour : current.getHours()) + houraddr,
 		(atmp.minute) ? atmp.minute : 0, //current.getMinutes(),
 		(atmp.second) ? atmp.second : 0 //current.getSeconds()
@@ -212,6 +218,12 @@ client.on('interactionCreate', async interaction =>
 		});
 
 		if (content == "") content = "No times were found.";
+		await interaction.reply({ content: `${content}`, ephemeral: true });
+	}
+	else if (interaction.commandName === 'listmembers')
+	{
+		let content = "";
+		if (content == "") content = "No members were found.";
 		await interaction.reply({ content: `${content}`, ephemeral: true });
 	}
 });
