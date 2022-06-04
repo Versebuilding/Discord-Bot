@@ -302,7 +302,7 @@ console.log = function()
 
 	log += out;
 
-	logbackup(out);
+	logbackup(out.substring(0, out.length - 1));
 
 	const trimto = log.length - 6000;
 	if (trimto > 0)
@@ -313,21 +313,24 @@ console.log = function()
 
 const fs = require('fs');
 
-const html = fs.readFileSync("./htmlfor_bot/log.html");
+const html = fs.readFileSync("./htmlfor_bot/log.html", 'utf8');
 
 const http = require('http');
 const server = http.createServer(function(req, res)
 {
-	if (req.url == '/index.html' || req.url == '/')
+	baseURL = req.protocol + '://' + req.headers.host + '/';
+	const reqUrl = new URL(req.url, baseURL);
+	if (reqUrl.pathname == '/index.html' || reqUrl.pathname == '/')
 	{
 		res.statusCode = 200;
 		res.setHeader('Content-Type', 'text/html');
-		html.replace(/(<p id=('log'|"log")>)(.*?)(<\/p>)/gm, "<p id='log'>" + log + "<\/p>");
-		res.end(data);
+		let htmllog = log.replaceAll("\n", "<br/>");
+		let s = html.replace(/(<p id=('log'|"log")>)(.*?)(<\/p>)/gm, "<p id='log'>" + htmllog + "<\/p>");
+		res.end(s);
 	}
 	else
 	{
-		var path = "./htmlfor_bot/" + req.params.filepath;
+		var path = "./htmlfor_bot" + reqUrl.pathname;
 		fs.readFile(path, function(err, data) {
 			if (err)
 			{
@@ -335,9 +338,11 @@ const server = http.createServer(function(req, res)
 				res.setHeader('Content-Type', 'text');
 				res.end(err.message);
 			}
-
-			res.statusCode = 200;
-			res.end(data);
+			else
+			{
+				res.statusCode = 200;
+				res.end(data);
+			}
 		});
 	}
 })

@@ -10,33 +10,32 @@ body {
 }
 
 .myDiv {
-    background-color:#354259 ;
-    
-    height: 45% ;
-    width: 70%;
-    padding: auto;
-    margin: auto;
-    border: solid;
-    overflow-y: scroll;
-    overflow-x: auto;} 
+  background-color:#354259 ;
+  width: 70%;
+  padding: 10px;
+  margin: auto;
+  border: solid;
+  border-radius: 6px;
+  border: black;
+}
 
 #log {
     color: azure;
     font-family:monospace;
-    text-align: left;}
-
-  
+    text-align: left;
+}
 
 /* Style the links inside the navigation bar */
 .navbar {
-    border-radius: 25px;
-    background-color: #A5BECC;
-    overflow: hidden;
-    height: 15% ;
-    width: 40%;
-    margin: auto;
-    
-  }
+  padding: 10px;
+  border-radius: 25px;
+  background-color: #A5BECC;
+  overflow: hidden;
+  height: 15% ;
+  width: 40%;
+  margin: auto;
+}
+
 .navbar a {
   float: center;
   color: black;
