@@ -1,0 +1,62 @@
+body {
+    background-color:#ECE5C7;
+    text-align: center;
+    overflow-y: auto;
+    background-image: url('news_BLM-art_0421.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center top;
+    background-size: cover
+}
+
+.myDiv {
+    background-color:#354259 ;
+    
+    height: 45% ;
+    width: 70%;
+    padding: auto;
+    margin: auto;
+    border: solid;
+    overflow-y: scroll;
+    overflow-x: auto;} 
+
+#log {
+    color: azure;
+    font-family:monospace;
+    text-align: left;}
+
+  
+
+/* Style the links inside the navigation bar */
+.navbar {
+    border-radius: 25px;
+    background-color: #A5BECC;
+    overflow: hidden;
+    height: 15% ;
+    width: 40%;
+    margin: auto;
+    
+  }
+.navbar a {
+  float: center;
+  color: black;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.navbar a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.navbar a.active {
+  background-color: #FEF9A7;
+  color: white;
+}
+
+
+    
