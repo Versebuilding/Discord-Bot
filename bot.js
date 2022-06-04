@@ -315,20 +315,53 @@ const fs = require('fs');
 
 const html = fs.readFileSync("./htmlfor_bot/log.html");
 
-const express = require('express');
-const app = express();
-const path = require('path');
-const router = express.Router();
+const http = require('http');
+const server = http.createServer(function(req, res)
+{
+	if (req.url == '/index.html' || req.url == '/')
+	{
+		res.statusCode = 200;
+		res.setHeader('Content-Type', 'text/html');
+		html.replace(/(<p id=('log'|"log")>)(.*?)(<\/p>)/gm, "<p id='log'>" + log + "<\/p>");
+		res.end(data);
+	}
+	else
+	{
+		var path = "./htmlfor_bot/" + req.params.filepath;
+		fs.readFile(path, function(err, data) {
+			if (err)
+			{
+				res.statusCode = 404;
+				res.setHeader('Content-Type', 'text');
+				res.end(err.message);
+			}
 
-router.get('/',function(req,res){
-	html.replace(/(<p id=('log'|"log")>)(.*?)(<\/p>)/gm, "<p id='log'>" + log + "<\/p>");
+			res.statusCode = 200;
+			res.end(data);
+		});
+	}
+})
 
-	return res.send(html);
+var port = process.env.PORT || 3000;
+
+server.listen(port, "0.0.0.0", function() {
+	console.log("Listening on Port " + port);
 });
 
-//add the router
-var port = process.env.PORT || 3000;
-app.use('/', router);
-app.listen(port);
+// const express = require('express');
+// const app = express();
+// const path = require('path');
+// const router = express.Router();
 
-console.log('Running at Port: ' + port);
+// router.get('/',function(req,res){
+// 	html.replace(/(<p id=('log'|"log")>)(.*?)(<\/p>)/gm, "<p id='log'>" + log + "<\/p>");
+
+// 	return res.send(html);
+// });
+
+// //add the router
+// var port = process.env.PORT || 3000;
+// app.use('/', router);
+// app.listen(port);
+
+// console.log('Running at Port: ' + port);
