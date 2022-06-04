@@ -56,7 +56,7 @@ const weekdays = [
 function attemptTime(str)
 {
 	let dayadder = -1;
-	let houraddr = +8;
+	let houraddr = +7;
 	weekdays.forEach(function(d, i)
 	{
 		//console.log(`${str} vs ${d}`, str.startsWith(d + " "), str.endsWith(" " + d));
