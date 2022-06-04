@@ -150,11 +150,13 @@ function getTimes(str)
 	let times = [];
 
 	let splt = str.split(" ");
+	let count = 0;
 	
 	// The max length of a time is 6 words
 	for (let j = 0; j < splt.length; j++) {
 		for (let i = 6; i > 0; i--) {
 			if (j + i > splt.length) continue;
+			count++;
 
 			//console.log(`\nRunning [${j}-${j+i})`)
 			let comp = "";
@@ -191,6 +193,8 @@ function getTimes(str)
 
 	// 	console.log("Attempt: ", atmp, "Format: ", dt)
 	// }
+
+	console.log(`-> Tried ${count} strings and found ${times.length} references to time/dates`);
 
 	return times;
 }
@@ -232,9 +236,10 @@ client.on('messageCreate', async msg =>
 {
 	if (msg.author.bot) return;
 
-	console.log(`Message Recieved: ${msg.author.username}`);
+	console.log(`Message Recieved: ${msg.author.username} (${msg.id})`);
 
 	const times = getTimes(msg.content);
+
 	let content = "";
 
 	times.forEach(e => {
@@ -253,12 +258,12 @@ client.on('messageCreate', async msg =>
 	msg.awaitReactions(
 		{ filter: rfilter, max: 1, time: 60000, errors: ['time'] }
 	).then(collected => {
-		console.log(`Reaction Recieved`);
+		console.log(`-> Reaction Recieved on message ${msg.id}`);
 		msg.reply({ content: content});
 
 	}).catch(collected =>
 	{
-		console.log("Reaction Timed Out!");
+		console.log(`-> Reaction timed-out on message ${msg.id}`);
 		const userReactions = msg.reactions.cache.filter(reaction => reaction.users.cache.has(client.user.id));
 
 		try {
