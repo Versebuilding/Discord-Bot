@@ -56,7 +56,7 @@ const weekdays = [
 function attemptTime(str)
 {
 	let dayadder = -1;
-	let houraddr = -5;
+	let houraddr = +8;
 	weekdays.forEach(function(d, i)
 	{
 		//console.log(`${str} vs ${d}`, str.startsWith(d + " "), str.endsWith(" " + d));
@@ -194,7 +194,7 @@ function getTimes(str)
 	// 	console.log("Attempt: ", atmp, "Format: ", dt)
 	// }
 
-	console.log(`-> Tried ${count} strings and found ${times.length} references to time/dates`);
+	console.log(`-> Tried ${count} string(s) and found ${times.length} reference(s) to a time/date`);
 
 	return times;
 }
