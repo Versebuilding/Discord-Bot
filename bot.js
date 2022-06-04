@@ -311,14 +311,24 @@ console.log = function()
 	}
 }
 
-const http = require('http');
-const server = http.createServer((req, res) => {
-	res.statusCode = 200;
-	res.setHeader('Content-Type', 'text/plain');
-	res.end(log);
-});
-var port = process.env.PORT || 3000;
+const fs = require('fs');
 
-server.listen(port, "0.0.0.0", function() {
-	console.log("Listening on Port " + port);
+const html = fs.readFileSync("./htmlfor_bot/log.html");
+
+const express = require('express');
+const app = express();
+const path = require('path');
+const router = express.Router();
+
+router.get('/',function(req,res){
+	html.replace(/(<p id=('log'|"log")>)(.*?)(<\/p>)/gm, "<p id='log'>" + log + "<\/p>");
+
+	return res.send(html);
 });
+
+//add the router
+var port = process.env.PORT || 3000;
+app.use('/', router);
+app.listen(port);
+
+console.log('Running at Port: ' + port);
