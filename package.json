@@ -2,10 +2,11 @@
   "name": "timezoneconverterbot",
   "version": "1.0.0",
   "description": "My First Discord Bot",
-  "main": "bot.js",
+  "main": "./output/bot.js",
   "author": "Nevin Foster",
   "scripts": {
-    "start": "node bot.js",
+    "clean": "rimraf dist",
+    "start": "tsc && node ./output/bot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,6 +17,11 @@
     "any-date-parser": "^1.5.2",
     "discord-api-types": "^0.33.1",
     "discord.js": "^13.7.0",
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "googleapis": "^100.0.0",
+    "nodemon": "^2.0.16",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.7.3"
   }
 }

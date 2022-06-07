@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"outDir": "output",
+		"downlevelIteration": true,
+		"skipLibCheck": true,
+		"lib": [
+			"ES2021.String"
+		]
+	},
+	"include": ["./*"],
+	
+}
