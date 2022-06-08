@@ -179,6 +179,11 @@ function getTimes(str: string): { in: string, out: { time: number; format: strin
  */
 async function OnMessage(client_id: string, msg: Message<boolean>): Promise<void>
 {
+	if (msg.author.bot)
+	{
+		Debug.Log("[TimeConverterMod] Message is from a bot. Not parsing for times/dates");
+		return;
+	}
 	const times = getTimes(msg.content);
 
 	let content = "";

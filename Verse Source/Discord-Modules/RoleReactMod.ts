@@ -1,4 +1,4 @@
-import { CacheType, Client, CommandInteraction, DiscordAPIError, EmbedFieldData, MessageActionRow, MessageButton, MessageEmbed, MessageReaction, PartialMessageReaction, PartialUser, User, Util } from "discord.js";
+import { ButtonInteraction, CacheType, Client, CommandInteraction, EmbedFieldData, Message, MessageActionRow, MessageButton, MessageEmbed, Util } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { DiscordModule } from "./DiscordModule";
 import { CommandNameFilter, Debug, FetchMember, FetchMessage, FetchRole, FetchTextChannel, SheetsWrapper } from "../util-lib";
@@ -65,13 +65,27 @@ export class RoleReactMod extends DiscordModule
 		}
 	}
 
-	async OnReaction(inReaction: MessageReaction | PartialMessageReaction, user: User | PartialUser)
+	async OnBtn(button: ButtonInteraction<CacheType>)
 	{
-		const reaction: MessageReaction = (inReaction.partial) ?
-			await inReaction.fetch() : inReaction as MessageReaction;
-
-		const index: number = this.roleMessages.findIndex(rm => rm.msg_id === reaction.message.id);
+		const index: number = this.roleMessages.findIndex(rm => rm.msg_id === button.message.id);
 		const rm: RoleMessage = this.roleMessages[index];
+
+		if (button.customId === 'getUsersMessage')
+		{
+			const message = await FetchMessage(rm.channel_id, rm.msg_id);
+
+			if (message == null)
+			{
+				Debug.Log("ERROR: Could not fetch message with id '" + rm.msg_id + "' for updating role messages!");
+				return;
+			}
+
+			var msg = await this.GetUpdatedMessage(message, rm, true, false);
+			msg["ephemeral"] = true;
+
+			button.reply(msg);
+			return;
+		}
 
 		if (!rm)
 		{
@@ -79,22 +93,21 @@ export class RoleReactMod extends DiscordModule
 			return
 		}
 
-		if (user.id === this.client.user.id)
+		if (button.user.id === this.client.user.id)
 		{
 			Debug.Log("-> This bot has reacted to a cashed message and is skipping...");
 			return;
 		}
 
-		const member = await FetchMember(user.id);
-		console.log(reaction.emoji);
+		const member = await FetchMember(button.user.id);
 
 		const role_pair = rm.roles.find(r => {
 			const raw = Util.resolvePartialEmoji(r.emoji_id);
 			if (raw.name && raw.id)
-				return raw.name === reaction.emoji.name && raw.id === reaction.emoji.id;
+				return raw.name === button.component.emoji.name && raw.id === button.component.emoji.id;
 			else if (raw.name)
-				return raw.name === reaction.emoji.name
-			else return raw.id === reaction.emoji.id;
+				return raw.name === button.component.emoji.name
+			else return raw.id === button.component.emoji.id;
 		});
 
 		if (member && role_pair)
@@ -106,19 +119,21 @@ export class RoleReactMod extends DiscordModule
 			{
 				Debug.Log(`-> Removing role '${role.name}' from user '${member.nickname}'`);
 				member.roles.remove(role);
+
+				button.reply({ content: "You have been removed to the role '" + role.name + "'", ephemeral: true});
 			}
 			else 
 			{
 				Debug.Log(`-> Adding role '${role.name}' to user '${member.nickname}'`);
 				member.roles.add(role);
+
+				button.reply({ content: "You have been added to the role '" + role.name + "'", ephemeral: true});
 			}
 
 			this.UpdateRoleMessage(index);
 		}
 		else
 			Debug.Log("-> Failed to get member or the role matching the emoji.");
-
-		reaction.users.remove(user.id);
 	}
 
 	async OnCMD_RoleMessage(interaction: CommandInteraction<CacheType>)
@@ -198,12 +213,76 @@ export class RoleReactMod extends DiscordModule
 	async OnCMD_RefreshRoleMessages(interaction: CommandInteraction<CacheType>)
 	{
 		await this.LoadCacheMessages((await SheetsWrapper.ReadAll()).values);
-		this.roleMessages.forEach((_, i) => this.UpdateRoleMessage(i, true));
+		this.roleMessages.forEach((_, i) => this.UpdateRoleMessage(i));
 
 		interaction.reply({ content: "All messages are up to date!", ephemeral: true });
 	}
 
-	async UpdateRoleMessage(index: number, full: boolean = false): Promise<boolean>
+	async GetUpdatedMessage(message: Message<boolean>, rm: RoleMessage,
+		includeUsers: boolean = false, includeBtns: boolean = false)
+	{
+		const embed = message.embeds[0];
+
+		var feilds: EmbedFieldData[] = [];
+
+		const guild = await this.client.guilds.fetch(process.env.GUILD_ID);
+		await guild.members.fetch();
+
+		var comps: MessageActionRow[] = [];
+		var count = 5;
+
+		rm.roles.forEach(async r => {
+			if (includeBtns && count > 4)
+			{
+				comps.push(new MessageActionRow());
+				count = 0;
+			}
+
+			var role = guild.roles.cache.get(r.id);
+
+			if (includeUsers)
+			{
+				feilds.push({
+					name: role.name + " " + r.emoji_id,
+					value: r.desc + "\n" + role.members.map(m => `<@${m.user.id}>`).join("\n"),
+					inline: true
+				});
+			}
+			else feilds.push({
+				name: role.name + " " + r.emoji_id,
+				value: r.desc,
+				inline: true
+			});
+
+			if (includeBtns) comps[comps.length - 1].addComponents(
+				new MessageButton()
+					.setCustomId(rm.msg_id + r.id)
+					.setLabel(role.name)
+					.setEmoji(r.emoji_id)
+					.setStyle("SECONDARY")
+			);
+
+			count++;
+		});
+
+		if (includeBtns)
+		{
+			comps.push(new MessageActionRow());
+
+			comps[comps.length - 1].addComponents(
+				new MessageButton()
+					.setCustomId("getUsersMessage")
+					.setLabel("Show Users")
+					.setStyle("PRIMARY")
+			);
+		}
+
+		embed.setFields(feilds);
+
+		return { embeds: [embed], components: comps };
+	}
+
+	async UpdateRoleMessage(index: number): Promise<boolean>
 	{
 		const rm = this.roleMessages[index];
 
@@ -215,59 +294,7 @@ export class RoleReactMod extends DiscordModule
 			return;
 		}
 
-		const embed = message.embeds[0];
-
-		if (full) await message.reactions.removeAll();
-
-		var feilds: EmbedFieldData[] = [];
-
-		const guild = await this.client.guilds.fetch(process.env.GUILD_ID);
-		await guild.members.fetch();
-
-		var comps: MessageActionRow[] = [];
-		var count = 5;
-
-		rm.roles.forEach(async r => {
-			if (count > 4)
-			{
-				comps.push(new MessageActionRow());
-				count = 0;
-			}
-
-			var role = guild.roles.cache.get(r.id);
-
-			feilds.push({
-				name: role.name + " " + r.emoji_id,
-				value: r.desc + "\n" + role.members.map(m => `<@${m.user.id}>`).join("\n"),
-				inline: true
-			});
-
-			comps[comps.length - 1].addComponents(
-				new MessageButton()
-					.setCustomId(JSON.stringify(r))
-					.setLabel(role.name)
-					.setEmoji(r.emoji_id)
-					.setStyle("SECONDARY")
-			);
-
-			(async () => {
-				try { await message.react(r.emoji_id); }
-				catch (error)
-				{
-					var api_error = error as DiscordAPIError;
-					if (api_error && api_error.message == "Unknown Emoji")
-						Debug.Log("Message react failed due to unknown emoji: '" + r.emoji_id + "'");
-					else
-						Debug.Log("Message react failed: " + error.message);
-				}
-			})();
-
-			count++;
-		});
-
-		embed.setFields(feilds);
-
-		message.edit({ embeds: [embed], components: comps });
+		message.edit(await this.GetUpdatedMessage(message, rm, false, true));
 		return true;
 	}
 
@@ -279,10 +306,10 @@ export class RoleReactMod extends DiscordModule
 
 		client.on("ready", async() => {
 			await this.LoadCacheMessages((await dataPromise).values)
-			this.roleMessages.forEach((_, i) => this.UpdateRoleMessage(i, true));
+			this.roleMessages.forEach((_, i) => this.UpdateRoleMessage(i));
 		});
 
-		client.on("messageReactionAdd", this.OnReaction.bind(this));
+		//client.on("messageReactionAdd", this.OnReaction.bind(this));
 
 		client.on("interactionCreate", async i =>
 			CommandNameFilter(i, "role-message", this.OnCMD_RoleMessage.bind(this)));
@@ -290,6 +317,10 @@ export class RoleReactMod extends DiscordModule
 			CommandNameFilter(i, "add-role", this.OnCMD_AddRole.bind(this)));
 		client.on("interactionCreate", async i =>
 			CommandNameFilter(i, "reload-role-messages", this.OnCMD_RefreshRoleMessages.bind(this)));
+
+		client.on("interactionCreate", async i => {
+			if (i.isButton()) this.OnBtn(i);
+		});
 	}
 
 	GetCommands(): SlashCommandBuilder[]
