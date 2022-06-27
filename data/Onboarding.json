@@ -1,0 +1,288 @@
+[{
+	"embeds": [{
+		"title": "Verse Creator Application and Onboarding",
+		"color": 4321431,
+		"description": "Thank you for your interest in becoming a **Verse Creator**! *Verse Creators* are what we call our internal team members. This application/onboarding is intended to verify your place in The Verse and to gather information so we can add you to our platforms. Throughout, we will introduce the main tools that we use here at The Verse, including optional tutorials and feature overviews. You will also be walked through some simple setup tasks for each of our tools, making sure that you are ready to go. There will be several opportunities to ask for help while completing steps, and you are encouraged to reach out for any questions.\nThis process will be broken down into two parts: **pre-interview** and **post-interview**. Optionally, we may schedule a second interview between the parts.\n",
+		"fields": [
+			{
+				"name": "Pre-Interview",
+				"value": "The pre-interview stage contains a lot of introduction to The Verse with important links and optional project pages. This first stage will also include gathering account information (emails, usernames..) and your introduction.",
+				"inline": true
+			},
+			{
+				"name": "Post-Interview",
+				"value": "The post-interview will contain internal (private) links and content that can only be accessed once we verify your account, and we have gotten a chance to add you to all platforms. The main goal of the post-interview stage is to set up and execute your Main Onboarding Deliverable.",
+				"inline": true
+			}
+		],
+		"author": {
+			"icon_url": "https://cutewallpaper.org/24/prepare-clipart/34529268.jpg",
+			"name": "Onboarding Application"
+		}
+	}],
+	"components": [{
+		"type": 1,
+		"components": [{
+			"style": 1,
+			"label": "Ready to begin Pre Interview",
+			"custom_id": "BeginApplication",
+			"disabled": false,
+			"emoji": { "name": "🧩" },
+			"type": 2
+		}]
+	}]
+}, {
+	"embeds": [{
+		"title": "Application Rejected!",
+		"color": 13967392,
+		"description": "We are sorry to inform you that we will not be moving forward with your application. Despite this, we really appreciate you reaching out! If you think this was an accident, please reach out and let us know.",
+		"author": {
+			"icon_url": "https://cutewallpaper.org/24/prepare-clipart/34529268.jpg",
+			"name": "Onboarding Application"
+		}
+	}]
+}, {
+	"embeds": [{
+		"title": "We Would Love a Follow-up!",
+		"color": 4321431,
+		"description": "We are very interested in your application and one of our Verse Administrators, {{{admin}}}, is excited to learn more about you in a one-on-one interview! This interview will be a call on Discord in one of our Jam Rooms. To find a meeting time, go to our [Google Calendar](https://calendar.google.com/calendar/u/3?cid=YnVpbGRpbmd2ZXJzZXNAZ21haWwuY29t) and see if any \"TV: BST Working Hours/Drop In Hours\" events will work for you. If not feel free to provide a few times .",
+		"author": {
+			"icon_url": "https://cutewallpaper.org/24/prepare-clipart/34529268.jpg",
+			"name": "Onboarding Application"
+		}
+	}],
+	"components": [{
+		"type": 1,
+		"components": [{
+			"style": 1,
+			"label": "Send Dates and Times",
+			"custom_id": "SetFollowupDate",
+			"disabled": false,
+			"emoji": { "name": "📅" },
+			"type": 2
+		}]
+	}]
+}, {
+	"embeds": [{
+		"title": "Application Accepted!",
+		"color": 4321431,
+		"description": "We a extremely happy to welcome you are a new team member in The Verse. You (should) have been added to all of our tools and platforms and you may begin the post interview section of the onboarding whenever convenient. As a reminder, the Post Interview stage will give you an indepth overview of our main tools as well as guide you through your Main Onboarding Deliverable.",
+		"author": {
+			"icon_url": "https://cutewallpaper.org/24/prepare-clipart/34529268.jpg",
+			"name": "Onboarding Application"
+		}
+	}],
+	"components": [{
+		"type": 1,
+		"components": [{
+			"style": 1,
+			"label": "Begin Post Interview Onboarding",
+			"custom_id": "BeginPostApplication",
+			"disabled": false,
+			"emoji": { "name": "🧩" },
+			"type": 2
+		}]
+	}]
+}, {
+	"embeds": [{
+		"title": "Verse Creator Application and Onboarding",
+		"color": 4321431,
+		"description": "Thank you for your interest in becoming a **Verse Creator**! *Verse Creators* are what we call our internal team members. This application/onboarding is intended to verify your place in The Verse and to gather information so we can add you to our platforms. Throughout, we will introduce the main tools that we use here at The Verse, including optional tutorials and feature overviews. You will also be walked through some simple setup tasks for each of our tools, making sure that you are ready to go. There will be several opportunities to ask for help while completing steps, and you are encouraged to reach out for any questions.\nThis process will be broken down into two parts: **pre-interview** and **post-interview**. Optionally, we may schedule a second interview between the parts.\n",
+		"fields": [
+			{
+				"name": "Pre-Interview",
+				"value": "The pre-interview stage contains a lot of introduction to The Verse with important links and optional project pages. This first stage will also include gathering account information (emails, usernames..) and your introduction.",
+				"inline": true
+			},
+			{
+				"name": "Post-Interview",
+				"value": "The post-interview will contain internal (private) links and content that can only be accessed once we verify your account, and we have gotten a chance to add you to all platforms. The main goal of the post-interview stage is to set up and execute your Main Onboarding Deliverable.",
+				"inline": true
+			}
+		],
+		"author": {
+			"icon_url": "https://cutewallpaper.org/24/prepare-clipart/34529268.jpg",
+			"name": "Onboarding Application"
+		}
+	}],
+	"components": [{
+		"type": 1,
+		"components": [{
+			"style": 1,
+			"label": "Ready to begin Pre Interview",
+			"custom_id": "BeginApplication",
+			"disabled": false,
+			"emoji": { "name": "🧩" },
+			"type": 2
+		}]
+	}]
+},
+{
+	"embeds": [{
+		"title": "Post-Interview Form (Internship)",
+		"color": 4321431,
+		"description": "As a new member to The Verse, we want you to create a simple deliverable using our tools to track your progress and share for final product. You can do anything that you want, as long as it is inspired by the motivations of The Verse. Your Main Onboarding Deliverable can tack many forms, including but not limited to: \n> 1) Narrative Document: write a short story about one of the projects.\n> 2) Game Protoype: spend a day and create a small game that is influenced by the ideas from The Verse. \n> 3) Karma Realms Comparison: brake any topic down into the 6 realms of karma. \nMore coming to the list later! If you are having trouble getting started, please reach out to one of the discord channels. You can view some example deliverables on [our Github](https://github.com/Versebuilding/Onboarding-Projects)",
+		"author": {
+			"icon_url": "https://cutewallpaper.org/24/prepare-clipart/34529268.jpg",
+			"name": "Onboarding Application"
+		}
+	}],
+	"components": [{
+		"type": 1,
+		"components": [{
+			"style": 1,
+			"label": "Creator Agreement",
+			"custom_id": "PostInterview_0",
+			"disabled": false,
+			"emoji": { "name": "🤝" },
+			"type": 2
+		}, {
+			"style": 1,
+			"label": "Discord",
+			"custom_id": "PostInterview_1",
+			"disabled": false,
+			"emoji": { "id": "985025868449607741", "name": "discord" },
+			"type": 2
+		}, {
+			"style": 1,
+			"label": "Clickup",
+			"custom_id": "PostInterview_2",
+			"disabled": false,
+			"emoji": { "id": "979281738335420476", "name": "clickup" },
+			"type": 2
+		}, {
+			"style": 1,
+			"label": "Miro",
+			"custom_id": "PostInterview_3",
+			"disabled": false,
+			"emoji": { "id": "985025209239212063", "name": "miro" },
+			"type": 2
+		}, {
+			"style": 1,
+			"label": "GitHub",
+			"custom_id": "PostInterview_4",
+			"disabled": false,
+			"emoji": { "id": "979281491903266826", "name": "github" },
+			"type": 2
+		}]
+	}, {
+		"type": 1,
+		"components": [{
+			"style": 1,
+			"label": "Google Workspace",
+			"custom_id": "PostInterview_5",
+			"disabled": false,
+			"emoji": { "id": "985023992651989072", "name": "google" },
+			"type": 2
+		}, {
+			"style": 1,
+			"label": "Outward Profile",
+			"custom_id": "PostInterview_6",
+			"disabled": false,
+			"emoji": { "id": "986290647189291008", "name": "name_tag" },
+			"type": 2
+		}, {
+			"style": 3,
+			"label": "Submit",
+			"custom_id": "PreInterview_submit",
+			"disabled": true,
+			"emoji": { "name": "📥" },
+			"type": 2
+		}, {
+			"style": 4,
+			"label": "Cancel",
+			"custom_id": "PreInterview_cancle",
+			"disabled": false,
+			"emoji": { "name": "⏏️" },
+			"type": 2
+		}]
+	}]
+}, {
+	"embeds": [{
+		"title": "Creator Agreement",
+		"color": 4321431,
+		"description": "Before you get working on any of the major projects, we will need you to sign an Internship Document that will define the legal terms of your internship. Please create a copy of [this document](https://docs.google.com/document/d/17I0AOIwMMuQfUWg9V6X06-K7o-fya-34x3bP6_FEJcQ/edit?usp=sharing), then read and fillin requested blanks. After filling out the agreement, download the file and upload using the upload button. Once you submit your Post-Interview, we will send you the officail (fully signed) copy to your preferred email address and on discord.",
+		"author": {
+			"icon_url": "https://cutewallpaper.org/24/prepare-clipart/34529268.jpg",
+			"name": "Onboarding Application"
+		}
+	}],
+	"components": [{
+		"type": 1,
+		"components": [{
+			"style": 1,
+			"label": "Upload",
+			"custom_id": "PreInterviewOption_tools_0",
+			"disabled": false,
+			"emoji": { "name": "🗳️" },
+			"type": 2
+		}, {
+			"style": 3,
+			"label": "Add to Application",
+			"custom_id": "PreInterviewOption_tools_submit",
+			"disabled": true,
+			"emoji": { "name": "📥" },
+			"type": 2
+		}, {
+			"style": 3,
+			"label": "Already Signed Agreement",
+			"custom_id": "PreInterviewOption_tools_submit",
+			"disabled": true,
+			"emoji": { "name": "📬" },
+			"type": 2
+		}, {
+			"style": 4,
+			"label": "Cancel/Help",
+			"custom_id": "PreInterviewOption_tools_help",
+			"disabled": false,
+			"emoji": { "name": "❔" },
+			"type": 2
+		}]
+	}]
+}, {
+	"embeds": [{
+		"title": "Discord <:discord:985025868449607741>",
+		"color": 4321431,
+		"description": "You should already be a little familiar with Discord and should have completed all of the setup in the previous steps. As stated before, we use Discord for all communication in The Verse, with the only exception being comments on tasks and documents. This message will elaborate on some other useful features that Discord enables.\nOnce you have completed your Onboarding Deliverable, make sure you post a message so everyone can enjoy your creation! We recommend the [team-communication channel](https://discord.com/channels/848804519847526460/979266090398007318).",
+		"fields": [
+			{
+				"name": "Threads",
+				"value": "Servers are listed on the right of discord, and represent a group or orginization. Our server is called “The Verse”. Direct messaging automatically happens outside of the server and is located at the top left above all of your servers.",
+				"inline": false
+			},
+			{
+				"name": "Server Tiers",
+				"value": "Categories are only used for grouping channels. The Verse has a few categories, including “Information” and “General”. Channels are groups chats used to divide different conversations, mainly used for separating project conversations, announcements, and other. There are both Voice and Text channels.",
+				"inline": false
+			},
+			{
+				"name": "Commands",
+				"value": "While in Discord, all Verse Creators will be able to use commands which you can access by typing “/” in any channel. Commands can only be used in the server or this DM, so you can try it here (and right now)! These commands are a great way for displaying information and using useful features such as polls/votes.",
+				"inline": false
+			}
+		],
+		"author": {
+			"icon_url": "https://cutewallpaper.org/24/prepare-clipart/34529268.jpg",
+			"name": "Onboarding Application"
+		}
+	}],
+	"components": [{
+		"type": 1,
+		"components": [{
+			"style": 3,
+			"label": "Understood",
+			"custom_id": "PreInterviewOption_cont",
+			"disabled": false,
+			"emoji": { "name": "☑️" },
+			"type": 2
+		}, {
+			"style": 4,
+			"label": "Cancel/Help",
+			"custom_id": "PreInterviewOption_help",
+			"disabled": false,
+			"emoji": { "name": "❔" },
+			"type": 2
+		}]
+	}]
+}
+]
