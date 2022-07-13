@@ -1,10 +1,9 @@
 import { ButtonInteraction, CacheType, Collector, InteractionCollector, Message, MessageButton, MessageComponentInteraction, MessageEmbed, MessageOptions, TextBasedChannel, TextChannel } from "discord.js";
-import { AskTextQuestion, ButtonCallbackMap, ClientCallbackData, ConfirmButtonInteraction, CreateMCCWithFooterTimer, CustomLock, Debug, EditAppendFieldTitle, EmbeddedPreviewMessage, FetchButtonMessage, FetchMember, FetchMessage, FetchMessageFromURL, FetchTextChannel, GetComponentFromMessage, IconLinks, SendConfirmation, SheetsWrapper } from "../util-lib";
+import { AskTextQuestion, ClientHelper, ConfirmButtonInteraction, CreateMCCWithFooterTimer, CustomLock, Debug, EditAppendFieldTitle, EmbeddedPreviewMessage, FetchButtonMessage, FetchMember, FetchMessage, FetchMessageFromURL, FetchTextChannel, GetComponentFromMessage, IconLinks, SendConfirmation, SheetsWrapper } from "../util-lib";
 import { DiscordModule } from "./DiscordModule";
 import * as onboarding_messages from "../../data/Onboarding.json"
 import { GetLinksFromString } from "./LinkCaptureMod";
-import { ButtonMapGenerators } from "./OnboardingButtons";
-
+//import { ButtonMapGenerators } from "./OnboardingButtons";
 
 export interface MenuData
 {
@@ -12,59 +11,24 @@ export interface MenuData
 	content: MessageOptions;
 }
 
+/**
+ * Loads all button callbacks dealing with applications.
+ */
 export class OnboardingMod extends DiscordModule
 {
-	static readonly author = {
-		icon_url: IconLinks.Application,
-		name: "Onboarding Application"
-	};
+	static readonly author = ;
 
 	static msgOpts;
 
 	Initialize()
 	{
-		OnboardingMod.msgOpts = onboarding_messages as MessageOptions[];
-		var callbackData = new ClientCallbackData();
+		ApplicationMod.msgOpts = onboarding_messages as MessageOptions[];
 
-		var idTable = new ButtonCallbackMap("Onboarding");
-
-		ButtonMapGenerators.forEach(gen => gen(idTable));
-
-		callbackData.addMap(idTable);
-
-		// callbackData.addButton({
-		// 	filter: i => i.customId.startsWith(ModPrelabel),
-		// 	execute: OnBtn_OnboardingBtnFilter
-		// });
-
-		// callbackData.addClientReady({ execute: async () =>
-		// 	Debug.Print((onboarding_messages as MessageOptions[])[0])
-		// });
-
-		callbackData.addButton({ customId: "StartOnboarding", execute: async b => {
+		ClientHelper.onButton_HasID("StartOnboarding", async b => {
 			Debug.Log("Starting an Onboarding interaction!");
 			b.reply({ content: "Thank you for considering joining The Verse. Please look at the message that I have sent you to get started.", ephemeral: true });
 			b.user.send(OnboardingMod.msgOpts[0]);
-		}});
-
-		callbackData.addButton({ customId: "BeginApplication", execute: async b => {
-			b.user.send(OnboardingMod.msgOpts[1]);
-			FetchButtonMessage(b).then(m => m.edit({ embeds: m.embeds, components: [] }));
-			b.deferUpdate();
-		}});
-
-		callbackData.addButton({ filter: i => i.customId.startsWith("PreInterview_"), execute: PreInterviewTabs });
-		callbackData.addButton({ filter: i => i.customId.startsWith("PostInterview_"), execute: PostInterviewTabs });
-		callbackData.addButton({ customId: "sentapplication_accept", execute: ApplicationAccept });
-		callbackData.addButton({ customId: "sentapplication_follow", execute: ApplicationFollow });
-		callbackData.addButton({ customId: "sentapplication_reject", execute: ApplicationReject });
-		callbackData.addButton({ customId: "SetFollowupDate", execute: SetFollowupDate });
-		callbackData.addButton({ customId: "BeginPostApplication", execute: i =>
-			i.reply({ content: "Sorry, this is not implelemted yet!", ephemeral: true })
 		});
-
-		return callbackData;
-	}
 }
 
 async function DisableButton(button: ButtonInteraction<CacheType>)
@@ -139,7 +103,7 @@ async function ApplicationAccept(button: ButtonInteraction<CacheType>)
 		" This will also upload their application to the Google Sheets.");
 	if (!conf) return;
 
-	button.reply({ content: "This is not ready yet! Please do not accept people (-Nev)."});
+	button.channel.send({ content: "<@" + button.user.id + ">: This is not ready yet! Please do not accept people (-Nev)." });
 	return;
 	FetchMember(user.substring(2, user.length - 1)).then(async mem =>
 	{

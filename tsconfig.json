@@ -1,12 +1,13 @@
 {
 	"compilerOptions": {
 		"outDir": "output",
+		"resolveJsonModule": true,
 		"downlevelIteration": true,
 		"skipLibCheck": true,
 		"lib": [
 			"ES2021.String"
 		]
 	},
-	"include": ["./*"],
-	
+	"exclude": ["./output"],
+	"include": ["./*"]
 }

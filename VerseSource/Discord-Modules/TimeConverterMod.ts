@@ -1,7 +1,7 @@
-import { Client, Interaction, Message } from "discord.js";
+import { CacheType, Client, CommandInteraction, Interaction, Message } from "discord.js";
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { DiscordModule } from "./DiscordModule";
-import { Debug } from "../util-lib";
+import { ClientHelper, Debug, MessageReactionCallback, RemoveReactionFromMsg } from "../util-lib";
 const adp = require("any-date-parser");
 
 /**
@@ -12,14 +12,17 @@ const adp = require("any-date-parser");
  * @param str A string that constist of only a description of a date.
  * @returns An object (pair) that containts the UNIX timestamp and Discord format described by input string.
  */
-function attemptTime(str: string): { time: number; format: string; }
+function attemptTime(input: string | null): { time: number; format: string; } | null
 {
+	var str: string = input ?? "";
+	if (str == "") return null;
+
 	const weekdays = [
 		"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 	];
 
 	let dayadder = -1;
-	let houraddr = +7;
+	let houraddr = -7;
 	weekdays.forEach(function(d, i)
 	{
 		//Debug.Log(`${str} vs ${d}`, str.startsWith(d + " "), str.endsWith(" " + d));
@@ -46,7 +49,7 @@ function attemptTime(str: string): { time: number; format: string; }
 	});
 
 	const atmp = adp.attempt(str);
-	//Debug.Log("Attempting string: '" + str + "'...:", atmp);
+	Debug.Log("Attempting string: '" + str + "'...:" + JSON.stringify(atmp));
 
 	if (!atmp || atmp.invalid) return null;
 
@@ -83,7 +86,7 @@ function attemptTime(str: string): { time: number; format: string; }
 		datetarget[5],
 	);
 
-	//Debug.Log(current, target);
+	Debug.Log(current, target);
 
 	let format = "f";
 
@@ -116,9 +119,12 @@ function attemptTime(str: string): { time: number; format: string; }
  * @returns An array of objects that state what english input (in) was used to create a corresponding
  * timestamp and format (out)
  */
-function getTimes(str: string): { in: string, out: { time: number; format: string; } }[]
+function getTimes(input: string | null): { in: string, out: { time: number; format: string; } }[]
 {
-	let times = [];
+	var str: string = input ?? "";
+	if (str == "") return [];
+
+	let times: { in: string, out: { time: number; format: string; } }[] = [];
 
 	let splt = str.split(" ");
 	let count = 0;
@@ -140,7 +146,7 @@ function getTimes(str: string): { in: string, out: { time: number; format: strin
 
 			if (time)
 			{
-				times.push({ "in": `${comp}`, "out": time });
+				times.push({ in: `${comp}`, out: time });
 				//Debug.Log({ "in": comp, "out": time});
 
 				j += i;
@@ -177,13 +183,8 @@ function getTimes(str: string): { in: string, out: { time: number; format: strin
  * @param msg Message that was created
  * @returns void
  */
-async function OnMessage(client_id: string, msg: Message<boolean>): Promise<void>
+async function OnMessage(msg: Message<boolean>): Promise<void>
 {
-	if (msg.author.bot)
-	{
-		Debug.Log("[TimeConverterMod] Message is from a bot. Not parsing for times/dates");
-		return;
-	}
 	const times = getTimes(msg.content);
 
 	let content = "";
@@ -194,39 +195,17 @@ async function OnMessage(client_id: string, msg: Message<boolean>): Promise<void
 
 	if (content == "") return;
 
-	await msg.react("<:timezone_react:981448185128030208>");
-
-	const rfilter = (reaction, user) => {
-		//Debug.Log(reaction, user, ('timezone_react' == reaction.emoji.name) && (user.id != client.user.id));
-		return ('timezone_react' == reaction.emoji.name) && (user.id != client_id);
-	};
-
-	msg.awaitReactions(
-		{ filter: rfilter, max: 1, time: 60000, errors: ['time'] }
-	).then(collected => {
+	MessageReactionCallback(msg, "<:timezone_react:981448185128030208>", _ => {
 		Debug.Log(`-> Reaction Recieved on message ${msg.id}`);
-		msg.reply({ content: content});
-
-	}).catch(collected =>
-	{
-		Debug.Log(`-> Reaction timed-out on message ${msg.id}`);
-		const userReactions = msg.reactions.cache.filter(reaction => reaction.users.cache.has(client_id));
-
-		try {
-			for (const reaction of userReactions.values()) {
-				reaction.users.remove(client_id);
-			}
-		} catch (error) {
-			console.error('Failed to remove reactions.');
-		}
+		RemoveReactionFromMsg(msg, "<:timezone_react:981448185128030208>");
+		msg.reply({ embeds: [{ description: content, author: {
+			name: "Time Converter", iconURL: "https://i.ibb.co/Nnsf207/Control-V-modified.png"
+		}}] });
 	});
 }
 
-async function OnInteraction(interaction: Interaction)
+async function OnCMD_Timecommand(interaction: CommandInteraction<CacheType>)
 {
-	if (!interaction.isCommand()) return;
-	if(interaction.commandName !== 'timecommand') return;
-
 	const times = getTimes(interaction.options.getString("input"));
 	let content = "";
 
@@ -235,27 +214,29 @@ async function OnInteraction(interaction: Interaction)
 	});
 
 	if (content == "") content = "No times were found.";
-	await interaction.reply({ content: `${content}`, ephemeral: true });
+	await interaction.reply({ embeds: [{ description: content, author: {
+		name: "Time Converter", iconURL: "https://i.ibb.co/Nnsf207/Control-V-modified.png"
+	} }], ephemeral: true });
 }
 
 
 export class TimeConverterMod extends DiscordModule
 {
-	Initialize(client: Client<boolean>) {
-		client.on("messageCreate", async msg => OnMessage(client.user.id, msg));
-		client.on("interactionCreate", OnInteraction);
-	}
-
-	GetCommands(): SlashCommandBuilder[]
+	Initialize()
 	{
-		const cmd = new SlashCommandBuilder();
-		cmd.setName('timecommand')
-			.setDescription('Converts any times in given text into Discord timezone commands!')
-			.addStringOption(option =>
-				option.setName('input')
-					.setDescription('The input to be parsed for times')
-					.setRequired(true));
+		ClientHelper.on("messageCreate", OnMessage,
+			msg => !msg.author.bot && msg.channel.type != "DM"
+		);
 
-		return [cmd];
+		ClientHelper.reg_cmd(
+			new SlashCommandBuilder()
+				.setName('timecommand')
+				.setDescription('Converts any times in given text into Discord timezone commands!')
+				.addStringOption(option =>
+					option.setName('input')
+						.setDescription('The input to be parsed for times')
+						.setRequired(true)),
+			OnCMD_Timecommand
+		)
 	}
 }

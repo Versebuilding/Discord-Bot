@@ -1,5 +1,0 @@
-export * from "./TimeConverterMod"
-export * from "./LoggingMod"
-export * from "./DiscordModule"
-export * from "./CoreMod"
-export * from "./RoleReactMod"
