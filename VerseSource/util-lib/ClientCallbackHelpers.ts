@@ -1,7 +1,6 @@
 import { Routes } from "discord-api-types/v9";
-import { CommandInteraction, ButtonInteraction, ClientEvents, Awaitable, Client, Interaction, Intents, ModalSubmitInteraction, GuildScheduledEventCreateOptions } from "discord.js";
+import { CommandInteraction, ButtonInteraction, ClientEvents, Awaitable, Client, Interaction, Intents, ModalSubmitInteraction } from "discord.js";
 import { CustomLock } from "./AsyncLock";
-import { Fetch } from "./FetchWrapper";
 import { Filters } from "./Filters";
 import { BaseInteraction, Delegate, SlashCommand } from "./types"
 import { Debug } from "./util";
@@ -222,11 +221,3 @@ ClientHelper.client = new Client({ intents: [
 	Intents.FLAGS.DIRECT_MESSAGES,
 	Intents.FLAGS.GUILD_INVITES,
 ]});
-
-Fetch.Guild().then(g => {
-	g.scheduledEvents.create({
-
-	})
-})
-
-const d: GuildScheduledEventCreateOptions;

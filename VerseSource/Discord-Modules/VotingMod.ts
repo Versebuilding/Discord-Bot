@@ -204,7 +204,7 @@ async function PollButton(btn: ButtonInteraction)
 	const def_promise = btn.deferUpdate();
 
 	const indexof = content.embeds[0].fields[index].value.indexOf("\n");
-	const val = indexof != 0 ?
+	const val = indexof != -1 ?
 		content.embeds[0].fields[index].value.substring(indexof) :
 		"";
 
