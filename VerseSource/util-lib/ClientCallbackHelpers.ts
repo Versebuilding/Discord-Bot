@@ -1,8 +1,8 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import { Routes } from "discord-api-types/v9";
-import { CommandInteraction, ButtonInteraction, ClientEvents, Awaitable, Client, Interaction, PermissionResolvable, Intents, ModalSubmitInteraction } from "discord.js";
+import { CommandInteraction, ButtonInteraction, ClientEvents, Awaitable, Client, Interaction, Intents, ModalSubmitInteraction, GuildScheduledEventCreateOptions } from "discord.js";
 import { CustomLock } from "./AsyncLock";
-import { FetchMember } from "./FetchWrapper";
+import { Fetch } from "./FetchWrapper";
+import { Filters } from "./Filters";
 import { BaseInteraction, Delegate, SlashCommand } from "./types"
 import { Debug } from "./util";
 
@@ -135,7 +135,7 @@ export class ClientHelper
 
 				if ((i.isButton() || i.isModalSubmit()))
 				{
-					const btnKey = i.message?.id + i.customId;
+					const btnKey = i.message.id ?? i.customId;
 					if (CustomLock.TryAquireKey(btnKey))
 					{
 						try {
@@ -163,7 +163,7 @@ export class ClientHelper
 						CustomLock.ReleaseKey(btnKey);
 					}
 					else i.reply({
-						content: "Button is already trying to respond (button was hit twice very fast)!",
+						content: "Button is already trying to respond (try again)!",
 						ephemeral: true
 					});
 				}
@@ -213,93 +213,6 @@ export interface AuthRoles
 	Admin: ["848806375668842511"];
 }
 
-export class Filters
-{
-	static Merge<K extends keyof ClientEvents>(...filters: (Delegate<ClientEvents[K], boolean> | null)[])
-		: Delegate<ClientEvents[K], boolean>
-	{
-		filters = filters.filter(f => f);
-
-		if (filters.length == 1)
-			return filters[0];
-
-		if (filters.length == 0)
-			return Filters.Pass();
-
-		return async (...args) => {
-			for await (const f of filters)
-				if (!await f(...args))
-					return false;
-			return true;
-		};
-	}
-
-	static Button(id: string = null, starts: boolean = false): (i: Interaction) => boolean
-	{
-		if (starts && id)
-			return (i) => (i.isButton()) && i.customId.startsWith(id);
-		else if (id)
-			return (i) =>(i.isButton()) && i.customId == id;
-		else return Filters._IsButton;
-	}
-
-	private static _IsButton(i: Interaction): boolean { return i.isButton(); }
-
-	static Modal(id: string = null, starts: boolean = false): (i: Interaction) => boolean
-	{
-		if (starts && id)
-			return (i) => (i.isModalSubmit()) && i.customId.startsWith(id);
-		else if (id)
-			return (i) =>(i.isModalSubmit()) && i.customId == id;
-		else return Filters._IsModal;
-		}
-
-	private static _IsModal(i: Interaction): boolean { return i.isModalSubmit(); }
-
-	static Command(cmd: Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> = null)
-		: (i: Interaction) => boolean
-	{
-		if (cmd)
-			return (i) => i.isCommand() && i.commandName == cmd.name;
-		else return Filters._IsCommand;
-	}
-
-	private static _IsCommand(i: Interaction): boolean { return i.isCommand(); }
-
-	static PermAuth(...perms: PermissionResolvable[])
-		: (i: Interaction) => Awaitable<boolean>
-	{
-		return async (i) => {
-			const mem = await FetchMember(i.user.id);
-
-			for (const perm of perms)
-				if (!mem.permissions.has(perm))
-					return false;
-
-			return true;
-		};
-	}
-
-	static RoleAuth(...role_ids: string[])
-	{
-		return async (i) => {
-			const mem = await FetchMember(i.user.id);
-
-			for (const role of role_ids)
-				if (!mem.roles.cache.has(role))
-					return false;
-
-			return true;
-		};
-	}
-
-	static Pass(): Delegate<[], boolean> { return Filters._Pass; };
-	/** Contant pointer to the "Pass" funciton, servers two purposes: 
-	 * 1) Avoids creating a new nameless function for each instance.
-	 * 2) "_Pass" is used as a */
-	private static _Pass(): boolean { return true };
-}
-
 // Create the client for discord
 ClientHelper.client = new Client({ intents: [
 	Intents.FLAGS.GUILDS,
@@ -309,3 +222,11 @@ ClientHelper.client = new Client({ intents: [
 	Intents.FLAGS.DIRECT_MESSAGES,
 	Intents.FLAGS.GUILD_INVITES,
 ]});
+
+Fetch.Guild().then(g => {
+	g.scheduledEvents.create({
+
+	})
+})
+
+const d: GuildScheduledEventCreateOptions;

@@ -6,3 +6,5 @@ export * from "./MenuDeclarations";
 import "./HelpMenus";
 import "./FirstApplication";
 import "./ConstMessages";
+import "./InternalContent";
+import "./Onboarding";

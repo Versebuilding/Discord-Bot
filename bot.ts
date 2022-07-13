@@ -1,6 +1,6 @@
 import { MessageOptions } from "discord.js";
 import * as tv from "./VerseSource";
-import { FetchTextChannel, Channels, Authors, Buttons, HelpMenus, CommandMenus } from "./VerseSource";
+import { Fetch, Channels, Authors, Buttons, HelpMenus, CommandMenus } from "./VerseSource";
 
 console.log("<><> Start bot of script <><>");
 
@@ -28,7 +28,8 @@ async function Startup()
 		new tv.ProfilesMod(),
 		new tv.RoleReactMod(),
 		new tv.LinkCaptureMod(),
-		new tv.HelpMod()
+		new tv.HelpMod(),
+		new tv.VotingMod(),
 	]
 
 	mods.forEach(element => element.Initialize());

@@ -1,7 +1,7 @@
 import { ButtonInteraction, CacheType, CommandInteraction, EmbedFieldData, Message, MessageActionRow, MessageButton, MessageEmbed, Util } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { DiscordModule } from "./DiscordModule";
-import { ClientHelper, Debug, FetchMember, FetchMessage, FetchRole, FetchTextChannel, Filters, SheetsWrapper } from "../util-lib";
+import { ClientHelper, Debug, Fetch, Filters, SheetsWrapper } from "../util-lib";
 import { ChannelType } from "discord-api-types/v9";
 
 interface RoleMessage {
@@ -61,7 +61,7 @@ export class RoleReactMod extends DiscordModule
 			for (let i = 2; i < row.length; i += 3)
 				rm.roles.push({ id: row[i], emoji_id: row[i+1], desc: row[i+2]});
 
-			const msgobj = await FetchMessage(rm.channel_id, rm.msg_id);
+			const msgobj = await Fetch.Message(rm.channel_id, rm.msg_id);
 			//if (msgobj == null) Debug.Log("RoleMessage could not be loaded! row:: ", row);
 			if (msgobj == null) continue;
 			this.roleMessages.push(rm);
@@ -77,7 +77,7 @@ export class RoleReactMod extends DiscordModule
 		const index: number = this.roleMessages.findIndex(rm => rm.msg_id === button.message.id);
 		const rm: RoleMessage = this.roleMessages[index];
 
-		const message = await FetchMessage(rm.channel_id, rm.msg_id);
+		const message = await Fetch.Message(rm.channel_id, rm.msg_id);
 
 		if (message == null)
 		{
@@ -94,7 +94,7 @@ export class RoleReactMod extends DiscordModule
 
 	async OnBtn_getSelfMessage(button: ButtonInteraction<CacheType>)
 	{
-		const member = await FetchMember(button.user.id);
+		const member = await Fetch.Member(button.user.id);
 		var content = `Remember, you can always view yours or anyones roles by clicking on a username/icon while in the server.\nYour Roles: `
 			+ member.roles.cache.map(r => `<@&${r.id}>`).join(", ");
 		button.reply({ content: content, ephemeral: true });
@@ -106,7 +106,7 @@ export class RoleReactMod extends DiscordModule
 		const index: number = this.roleMessages.findIndex(rm => rm.msg_id === button.message.id);
 		const rm: RoleMessage = this.roleMessages[index];
 
-		const member = await FetchMember(button.user.id);
+		const member = await Fetch.Member(button.user.id);
 
 		const role_pair = rm.roles.find(r => {
 			const raw = Util.resolvePartialEmoji(r.emoji_id);
@@ -119,7 +119,7 @@ export class RoleReactMod extends DiscordModule
 
 		if (member && role_pair)
 		{
-			const role = await FetchRole(role_pair.id);
+			const role = await Fetch.Role(role_pair.id);
 
 			// Toggle
 			if (member.roles.cache.some(r => r.id === role.id))
@@ -173,7 +173,7 @@ export class RoleReactMod extends DiscordModule
 		embedObj.setFields([]);
 
 		// Might not be needed
-		const targetChannel = await FetchTextChannel(channel.id);
+		const targetChannel = await Fetch.TextChannel(channel.id);
 		const sentMessage = await targetChannel.send({ embeds: [embedObj] });
 
 		SheetsWrapper.AppendRow({ values: [sentMessage.id, targetChannel.id] })
@@ -333,7 +333,7 @@ export class RoleReactMod extends DiscordModule
 	{
 		const rm = this.roleMessages[index];
 
-		const message = await FetchMessage(rm.channel_id, rm.msg_id);
+		const message = await Fetch.Message(rm.channel_id, rm.msg_id);
 
 		if (message == null)
 		{

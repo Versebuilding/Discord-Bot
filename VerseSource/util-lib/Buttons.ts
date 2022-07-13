@@ -58,6 +58,19 @@ export const Buttons =
 
 	ToRows: (btn: MessageButton) => [new MessageActionRow().addComponents(btn)],
 	ButtonsToRows: (...buttons: MessageButton[]) => Buttons.AddButtonsToRows([...buttons], []),
+	ButtonsToLimitedRows: (buttons: MessageButton[], rowLimit: number): MessageActionRow[] =>
+	{
+		Debug.Assert(rowLimit > 0 && rowLimit < 5);
+		const comps: MessageActionRow[] = [];
+
+		for(var i = 0; i < Math.ceil(buttons.length / rowLimit); i++)
+			comps.push(new MessageActionRow());
+
+		buttons.forEach((btn, index) => {
+			comps[Math.floor(index / rowLimit)].addComponents(btn);
+		});
+		return comps;
+	},
 	AddButtonsToRows: function(buttons: MessageButton[], comps: MessageActionRow[]): MessageActionRow[]
 	{
 		buttons.forEach(btn => {
@@ -67,6 +80,17 @@ export const Buttons =
 		});
 		return comps;
 	},
+
+	GetBestRowLength: (numberOfButtons: number) =>
+		(numberOfButtons <= 3) ? 5 :
+		(numberOfButtons == 4) ? 2 :
+		(numberOfButtons <= 6) ? 3 :
+		(numberOfButtons <= 8) ? 4 :
+		(numberOfButtons == 10) ? 5 :
+		(numberOfButtons <= 12) ? 4 :
+		(numberOfButtons <= 15) ? 5 :
+		(numberOfButtons == 16) ? 4 :
+		5,
 
 	NullCall: "null call",
 	NotImplemented: "not implemented",

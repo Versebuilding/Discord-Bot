@@ -3,7 +3,7 @@ import { Message, Client, CacheType, ButtonInteraction, MessageActionRow, Messag
 import { InterfaceType, readBuilderProgram } from 'typescript';
 import { CustomLock } from './AsyncLock';
 import { ClientHelper } from './ClientCallbackHelpers';
-import { FetchInteractionChannel, FetchButtonMessage, FetchMessage, FetchTextChannel } from "./FetchWrapper";
+import { Fetch } from "./FetchWrapper";
 import { FuncAble } from './types';
 const path = require('node:path');
 
@@ -79,7 +79,7 @@ export class Debug
 	{
 		try {
 			if (ClientHelper.client.isReady())
-				FetchTextChannel("978188746564468746").then(c => { c.send(msg); });
+				Fetch.TextChannel("978188746564468746").then(c => { c.send(msg); });
 			else
 				Debug.Log("Client is not ready yet! Cannot Debug.Print yet!");
 
@@ -293,7 +293,6 @@ export async function SendConfirmation(channel: PartialTextBasedChannelFields, m
 		embeds?: (MessageEmbed | MessageEmbedOptions | APIEmbed)[]})
 	: Promise<boolean>
 {
-	let c : MessageOptions;
 	return new Promise(async (resolve) =>
 	{
 		const rpl = await channel.send({
@@ -407,7 +406,7 @@ export function AwaitForSeconds<T>(promise: Promise<T>): Promise<T>
 export async function CloseMessage(button: ButtonInteraction<CacheType>): Promise<boolean | unknown>
 {
 	try {
-		let msg = await FetchButtonMessage(button);
+		let msg = await Fetch.ButtonMessage(button);
 		await CustomLock.WaitToHoldKey(msg.id, () => msg.delete());
 		return true;
 	} catch {
@@ -415,16 +414,17 @@ export async function CloseMessage(button: ButtonInteraction<CacheType>): Promis
 	}
 }
 
-function _UpdateFooterTimer(message: Message<boolean>, endTime: number, intervaler?: NodeJS.Timer)
+async function _UpdateFooterTimer(message: Message<boolean>, endTime: number, intervaler?: NodeJS.Timer)
 {
-	if (!message)
-	{
-		if (intervaler) clearInterval(intervaler);
-		return;
-	}
+	const key = message?.id;
 
-	try { CustomLock.TryHoldKey(message.id, async function()
-	{
+	try {
+		if (!(key && CustomLock.TryAquireKey(key) && await message.fetch(true)))
+		{
+			if (intervaler) clearInterval(intervaler);
+			return;
+		}
+		
 		if (message.embeds.length <= 0)
 			message.embeds.push();
 
@@ -433,11 +433,15 @@ function _UpdateFooterTimer(message: Message<boolean>, endTime: number, interval
 			iconURL: "https://cdn-icons-png.flaticon.com/512/3003/3003202.png"
 		});
 		return await message.edit({ embeds: message.embeds});
-	});
-	} catch(e)
+
+	}
+	catch(e)
 	{
-		Debug.Log("Update timer error: " + e.message);
-		return;
+		Debug.LogError("Update timer error: ", e);
+	}
+	finally
+	{
+		CustomLock.ReleaseKey(key);
 	}
 }
 
@@ -452,7 +456,6 @@ export function CreateMCCWithFooterTimer(message: Message<boolean>, options?: {
 	var collector = message.createMessageComponentCollector(options);
 	var end = Date.now() + time;
 
-	let resolved: boolean = true;
 	let intervaler = setInterval(() => _UpdateFooterTimer(message, end, intervaler), 3000);
 
 	let save = collector.resetTimer;
@@ -523,6 +526,7 @@ export async function AskTextQuestion({
 
 			let err = await validate(a);
 			console.log("Validation complete: " + err);
+
 			if (!err) break;
 
 			else if (await SendConfirmation(channel, {  embeds: [{
@@ -541,9 +545,10 @@ export async function AskTextQuestion({
 	{
 		if (useTimer && intervaler)
 		{
+			console.log("Clearing interval");
 			clearInterval(intervaler);
 			q.embeds[q.embeds.length - 1].setFooter({ text: ""});
-			q.edit({ embeds: q.embeds}).catch(/*Debug.Error*/ () => {});
+			await q.edit({ embeds: q.embeds}).catch(/*Debug.Error*/ () => {});
 		}
 	}
 
@@ -559,7 +564,7 @@ export function EditAppendFieldTitle(embed: MessageEmbed, name: string, value: s
 
 export function GetComponentFromButton(btn: ButtonInteraction): Promise<MessageButton>
 {
-	return FetchButtonMessage(btn).then(msg => GetComponentFromMessage(msg, btn.customId) as MessageButton);
+	return Fetch.ButtonMessage(btn).then(msg => GetComponentFromMessage(msg, btn.customId) as MessageButton);
 }
 
 export function GetComponentFromMessage(msg: Message<boolean>, customId: string): MessageActionRowComponent
@@ -580,7 +585,7 @@ async function ValidateButtonInteraction(button: ButtonInteraction<CacheType>): 
 	try
 	{
 		// Make sure that button still exists. Error if else.
-		let msg = await FetchButtonMessage(button);
+		let msg = await Fetch.ButtonMessage(button);
 
 		// Make sure that button is still enabled
 		if (GetComponentFromMessage(msg, button.id).disabled)

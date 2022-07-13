@@ -1,5 +1,5 @@
 import { Awaitable, MessageButton, MessageOptions } from "discord.js";
-import { Authors, Buttons, Delegate, ClientHelper, FetchMember, Debug, Channels, FetchTextChannel, BaseInteraction, IconLinks, Roles, FuncAble, ResolveFuncAble, FetchMessage, CloseMessage } from "../../util-lib";
+import { Authors, Buttons, Delegate, ClientHelper, Fetch, Debug, Channels, BaseInteraction, IconLinks, Roles, FuncAble, ResolveFuncAble, CloseMessage } from "../../util-lib";
 import { isProfileSetup } from "../ProfilesMod";
 import { CommandMenus, HelpMenus } from "./MenuDeclarations";
 
@@ -9,7 +9,7 @@ const toProfileSetup = HelpMenus.VerseCreatorApplication.RegSwap(CommandMenus.pr
 // TODO: Change to Verse Creators that cannot apply.
 HelpMenus.VerseCreatorApplication.allowed = async (i) =>
 {
-	const mem = await FetchMember(i.user.id);
+	const mem = await Fetch.Member(i.user.id);
 	return !mem.roles.cache.has(Roles.Copper.id);
 };
 
@@ -29,7 +29,7 @@ const preAppTasks: {
 		name: "Add Yourself to Skills and Projects",
 		desc: "Let others see your skills and interests.",
 		isDone: async (i) => {
-			var mem = await FetchMember(i.user.id);
+			var mem = await Fetch.Member(i.user.id);
 			return (mem.roles.cache.size > 2)
 		},
 		goto: Buttons.Link({
@@ -72,8 +72,8 @@ Debug.Assert(appQuestions.length < 6);
 const appSubmitId = ClientHelper.reg_mdl("Verse-Creator-Application|Submit", async mdl =>
 {
 	const [mem, channel] = await Promise.all([
-		FetchMember(mdl.user.id),
-		FetchTextChannel(Channels.applications)
+		Fetch.Member(mdl.user.id),
+		Fetch.TextChannel(Channels.applications)
 	]);
 
 	const msg: MessageOptions = { embeds: [{

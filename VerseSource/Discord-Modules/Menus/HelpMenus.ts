@@ -119,5 +119,7 @@ HelpMenus.InfoMenu.MakeDirectoryMenu({ embeds: [{
 	HelpMenus.ServerRules,
 	HelpMenus.OutwardContent,
 	HelpMenus.VerseCreatorApplication,
+	HelpMenus.OnboardingHome,
+	HelpMenus.InternalContent,
 	CommandMenus.profileSetup,
 ]);

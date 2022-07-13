@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ButtonInteraction, Channel, ColorResolvable, CommandInteraction, GuildBasedChannel, Message, MessageButton, MessageEmbedOptions, MessageOptions, User } from "discord.js";
-import { AskTextQuestion, Authors, Buttons, ClientHelper, CloseMessage, COMMON_REGEXPS, Debug, Delegate, FetchChannel, FetchMember, GetRoleInfo, IconLinks, Roles, SendAcceptNote, SendConfirmation, SheetsWrapper, ToColor } from "../util-lib";
+import { AskTextQuestion, Authors, Buttons, ClientHelper, CloseMessage, COMMON_REGEXPS, Debug, Delegate, Fetch, GetRoleInfo, IconLinks, Roles, SendAcceptNote, SendConfirmation, SheetsWrapper, ToColor } from "../util-lib";
 import { DiscordModule } from "./DiscordModule";
 import { ProfileColumnHeaders } from "../util-lib/ProfileColumnHeaders";
 import { CommandMenus, HelpMenus, MessageMenu } from "./Menus";
@@ -28,7 +28,7 @@ async function OnCMD_Profile(cmd: CommandInteraction)
 		cmd.reply({ embeds:[await ProfilesMod.LoadEmbed_Personal(target.id, true)], ephemeral: true });
 	else
 	{
-		await FetchChannel(channel.id).then(async c => {
+		await Fetch.Channel(channel.id).then(async c => {
 			if (c.isText())
 			{
 				await c.send({ embeds:[await ProfilesMod.LoadEmbed_Personal(target.id, true)] });
@@ -106,7 +106,7 @@ export class ProfilesMod extends DiscordModule
 
 		if (index == -1)
 		{
-			const mem = await FetchMember(user_id);
+			const mem = await Fetch.Member(user_id);
 			if (mem)
 				Debug.Warning("User was not found in table! (id='" + user_id + "', displayName='" + mem.displayName + "')");
 			else
@@ -125,7 +125,7 @@ export class ProfilesMod extends DiscordModule
 
 		if (index == -1)
 		{
-			const mem = await FetchMember(user_id);
+			const mem = await Fetch.Member(user_id);
 			if (mem)
 				Debug.Warning("User was not found in table! (id='" + user_id + "', displayName='" + mem.displayName + "')");
 			else
@@ -165,7 +165,7 @@ export class ProfilesMod extends DiscordModule
 	{
 		const [data, mem] = await Promise.all([
 			ProfilesMod.GetAllUserDataByID(user_id),
-			FetchMember(user_id)
+			Fetch.Member(user_id)
 		]);
 		
 		if (!data || !mem) return {
@@ -287,7 +287,7 @@ const personalInfo: [
 			return "Sorry, but to make sure we can fit all of your information onto your profile, we capped Full Names to 50 characters. Try abbreviations or omitting parts of your name (like middle).";
 		if (msg.content.length <= 3) return "Your answer is too short to be a Full name (min is 4 characters).";
 
-		const mem = await FetchMember(msg.author.id);
+		const mem = await Fetch.Member(msg.author.id);
 
 		// If user is an Admin, the bot won't be able to set username.
 		if (mem.roles.cache.has("848806375668842511")) return null;

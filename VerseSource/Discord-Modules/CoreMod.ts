@@ -1,7 +1,7 @@
 import { CacheType, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { DiscordModule } from "./DiscordModule";
-import { Authors, ClientHelper, Debug, EmbeddedPreviewMessage, FetchMessage, FetchMessageFromURL, FetchTextChannel, PreviewMessage } from "../util-lib";
+import { Authors, ClientHelper, Debug, EmbeddedPreviewMessage, Fetch, PreviewMessage } from "../util-lib";
 
 async function OnCMD_Ping(interaction: CommandInteraction<CacheType>)
 {
@@ -56,7 +56,7 @@ async function OnCMD_SendEmbed(interaction: CommandInteraction<CacheType>)
 	}
 
 	var channelObj :TextChannel;
-	try { channelObj = await FetchTextChannel(channel.id); }
+	try { channelObj = await Fetch.TextChannel(channel.id); }
 	catch { interaction.reply({embeds: [{ description: "Failed to find channel!", author: Authors.Core }], 
 		ephemeral: true});
 		return;
@@ -94,7 +94,7 @@ async function OnCMD_EditEmbed(interaction: CommandInteraction<CacheType>)
 	}
 
 	var message :Message<boolean>;
-	try { message = await FetchMessage(channel.id, msgid); }
+	try { message = await Fetch.Message(channel.id, msgid); }
 	catch { interaction.reply({ content: "Failed to find message!", 
 		ephemeral: true});
 		return;
@@ -123,7 +123,7 @@ async function OnCMD_MessagePreview(interaction: CommandInteraction<CacheType>)
 	const msg_link = interaction.options.getString("message-link");
 
 	try {
-		var msg = await FetchMessageFromURL(msg_link);
+		var msg = await Fetch.MessageFromURL(msg_link);
 		if (!msg) throw new Error();
 
 		interaction.reply({ content: "Here is that message: ", embeds: EmbeddedPreviewMessage(msg), ephemeral: true });

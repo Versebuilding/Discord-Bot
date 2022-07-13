@@ -1,6 +1,6 @@
 import { CacheType, CommandInteraction, Message, MessageButton, MessageEmbedOptions } from "discord.js";
 import { DiscordModule } from "./DiscordModule";
-import { Buttons, ClientHelper, COMMON_REGEXPS, CreateMCCWithFooterTimer, CustomLock, Debug, FetchChannel, FetchMessageFromURL, GetNumberEmoji, MessageReactionCallback, RemoveReactionFromMsg, SheetsWrapper } from "../util-lib"
+import { Buttons, ClientHelper, COMMON_REGEXPS, CreateMCCWithFooterTimer, CustomLock, Debug, Fetch, GetNumberEmoji, MessageReactionCallback, RemoveReactionFromMsg, SheetsWrapper } from "../util-lib"
 import { SlashCommandBuilder } from "@discordjs/builders";
 
 async function OnMessage(msg: Message<boolean>)
@@ -29,7 +29,7 @@ export function GetLinksFromString(str: string): RegExpMatchArray
 
 async function CreateInteractableLinkReply(msg: Message<boolean>, links: RegExpMatchArray)
 {
-	const channelName = (await FetchChannel(msg.channelId)).name;
+	const channelName = (await Fetch.Channel(msg.channelId)).name;
 
 	var comps = Buttons.ButtonsToRows(...links.map((l, i) => new MessageButton()
 		.setCustomId(i.toString())
@@ -116,7 +116,7 @@ async function OnCMD_UploadFromMessage(i: CommandInteraction<CacheType>)
 {
 	const msglink = i.options.getString("message-link");
 
-	FetchMessageFromURL(msglink).then(msg =>
+	Fetch.MessageFromURL(msglink).then(msg =>
 	{
 		i.reply({ embeds: [{
 			title: "Done!",

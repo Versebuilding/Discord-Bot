@@ -7,6 +7,7 @@ export const IconLinks =
 	Error: "https://upload.wikimedia.org/wikipedia/commons/3/34/ErrorMessage.png",
 	Warning: "https://www.safetysign.com/images/source/medium-images/J6520.png",
 	Check: "https://uxwing.com/wp-content/themes/uxwing/download/48-checkmark-cross/success-green-check-mark.png",
+	Vote: "https://icons.iconarchive.com/icons/iconarchive/blue-election/1024/Election-Vote-icon.png",
 }
 
 export const Authors = {
@@ -34,6 +35,11 @@ export const Authors = {
 		icon_url: IconLinks.Error,
 		name: "Error!"
 	},
+
+	Vote: {
+		name: "Vote",
+		icon_url: IconLinks.Vote,
+	}
 }
 
 export const Channels = 

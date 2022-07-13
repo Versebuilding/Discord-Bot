@@ -1,6 +1,6 @@
 import { APIEmbed } from "discord-api-types/v9";
 import { Awaitable, ButtonInteraction, EmbedField, EmbedFieldData, EmojiIdentifierResolvable, EmojiResolvable, Message, MessageButtonOptions, MessageButtonStyle, MessageEmbed, MessageEmbedOptions, MessageOptions  } from "discord.js";
-import { BaseInteraction, Buttons, ClientHelper, CloseMessage, Debug, Delegate, FetchInteractionChannel, MessageData, SendConfirmation, Authors, FuncAble, ResolveFuncAble, PartialButtonOptions } from "../../util-lib";
+import { BaseInteraction, Buttons, ClientHelper, CloseMessage, Debug, Delegate, Fetch, MessageData, SendConfirmation, Authors, FuncAble, ResolveFuncAble, PartialButtonOptions } from "../../util-lib";
 
 type RegisterOptions = "NONE" | "OPEN" | "DMOPEN" | "OPEN+DMOPEN";
 
@@ -45,7 +45,7 @@ export class MessageMenu
 	async ConfExit(i: BaseInteraction): Promise<boolean>
 	{
 		const [channel, exitMessage] = await Promise.all([
-			FetchInteractionChannel(i),
+			Fetch.InteractionChannel(i),
 			ResolveFuncAble(this.exitMessage, i)
 		]);
 
@@ -65,7 +65,7 @@ export class MessageMenu
 			throw new Error("'" + this.name + "'.menu has not been set yet!");
 
 		const [channel, menu] = await Promise.all([
-			FetchInteractionChannel(i),
+			Fetch.InteractionChannel(i),
 			ResolveFuncAble(this.menu, i)
 		]);
 
@@ -115,7 +115,7 @@ export class MessageMenu
 
 	async Swap(btn: ButtonInteraction)
 	{
-		var channelPromise = FetchInteractionChannel(btn);
+		var channelPromise = Fetch.InteractionChannel(btn);
 		if (this.menu)
 		{
 			const [channel, menu] = await Promise.all([
@@ -221,21 +221,23 @@ export class MessageMenu
 			lastEmbed.fields.push(menu.Field())
 		);
 
+		const buttonRowLimit = Buttons.GetBestRowLength(sub_menus.length);
 
-		this.menu = async (interaction) => {
-			base.components = Buttons.ButtonsToRows(
-				...await Promise.all(sub_menus.map(async (menu, index) =>
+		this.menu = async (interaction) =>
+		{
+			base.components = Buttons.ButtonsToLimitedRows(
+				await Promise.all(sub_menus.map(async (menu, index) =>
 				{
 					const options: PartialButtonOptions = styles[index] !== null && styles[index] !== void 0 ?
 						(await ResolveFuncAble(styles[index], interaction)) ?? {} : {};
-	
+
 					options.style = options.style ?? "PRIMARY";
 					options.disabled = options.disabled ?? !await ResolveFuncAble(menu.allowed, interaction);
 					options.label = options.label ?? menu.name;
 					options.emoji = options.emoji ?? menu.emoji;
 
 					return Buttons.Data(ids[index], options);
-				}))
+				})), buttonRowLimit
 			);
 			return base;
 		}
