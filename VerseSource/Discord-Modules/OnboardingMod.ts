@@ -1,5 +1,5 @@
 import { ButtonInteraction, CacheType, Collector, InteractionCollector, Message, MessageButton, MessageComponentInteraction, MessageEmbed, MessageOptions, TextBasedChannel, TextChannel } from "discord.js";
-import { AskTextQuestion, ClientHelper, ConfirmButtonInteraction, CreateMCCWithFooterTimer, CustomLock, Debug, EditAppendFieldTitle, EmbeddedPreviewMessage, FetchButtonMessage, FetchMember, FetchMessage, FetchMessageFromURL, FetchTextChannel, GetComponentFromMessage, IconLinks, SendConfirmation, SheetsWrapper } from "../util-lib";
+import { AskTextQuestion, ClientHelper, ConfirmButtonInteraction, CreateMCCWithFooterTimer, CustomLock, Debug, EditAppendFieldTitle, EmbeddedPreviewMessage, FetchButtonMessage, FetchMember, FetchMessage, FetchMessageFromURL, FetchTextChannel, GetComponentFromMessage, IconLinks, SendConfirmation, SheetsHelpers } from "../util-lib";
 import { DiscordModule } from "./DiscordModule";
 import * as onboarding_messages from "../../data/Onboarding.json"
 import { GetLinksFromString } from "./LinkCaptureMod";
@@ -108,7 +108,7 @@ async function ApplicationAccept(button: ButtonInteraction<CacheType>)
 	FetchMember(user.substring(2, user.length - 1)).then(async mem =>
 	{
 		mem.send(OnboardingMod.msgOpts[13]);
-		var cols = await SheetsWrapper.ReadRow(1, "Applications");
+		var cols = await SheetsHelpers.ReadRow(1, "Applications");
 		let len = cols.length;
 
 		let values: string[] = [];
@@ -127,8 +127,8 @@ async function ApplicationAccept(button: ButtonInteraction<CacheType>)
 		});
 
 		if (len != cols.length)
-			await SheetsWrapper.UpdateRow({ values: cols, sheetname: "Applications", row: 1 })
-		await SheetsWrapper.AppendRow( { values: values, sheetname: "Applications" });
+			await SheetsHelpers.UpdateRow({ values: cols, sheetname: "Applications", row: 1 })
+		await SheetsHelpers.AppendRow( { values: values, sheetname: "Applications" });
 
 		button.channel.send({ content: "Post Application was sent by <@" + button.user.id + ">. User " + user + " is now a Verse Creator" });
 	});

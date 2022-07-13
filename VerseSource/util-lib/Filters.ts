@@ -83,7 +83,7 @@ export namespace Filters
 					result && mem.roles.cache.has(role) :
 					result || mem.roles.cache.has(role);
 
-			return true;
+			return result;
 		};
 	}
 

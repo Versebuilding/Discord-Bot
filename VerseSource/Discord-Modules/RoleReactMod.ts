@@ -1,7 +1,7 @@
 import { ButtonInteraction, CacheType, CommandInteraction, EmbedFieldData, Message, MessageActionRow, MessageButton, MessageEmbed, Util } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { DiscordModule } from "./DiscordModule";
-import { ClientHelper, Debug, Fetch, Filters, SheetsWrapper } from "../util-lib";
+import { ClientHelper, Debug, Fetch, Filters, SheetsHelpers } from "../util-lib";
 import { ChannelType } from "discord-api-types/v9";
 
 interface RoleMessage {
@@ -176,7 +176,7 @@ export class RoleReactMod extends DiscordModule
 		const targetChannel = await Fetch.TextChannel(channel.id);
 		const sentMessage = await targetChannel.send({ embeds: [embedObj] });
 
-		SheetsWrapper.AppendRow({ values: [sentMessage.id, targetChannel.id] })
+		SheetsHelpers.AppendRow({ values: [sentMessage.id, targetChannel.id] })
 		this.roleMessages.push({ msg_id: sentMessage.id, channel_id: targetChannel.id, roles: [] });
 
 		interaction.reply({ content: "Message sent and cached!", ephemeral: true });
@@ -232,13 +232,13 @@ export class RoleReactMod extends DiscordModule
 
 		rm.roles.forEach(r => values = values.concat(r.id, r.emoji_id, r.desc));
 
-		await SheetsWrapper.UpdateRow({ values: values, row: index + 2 });
+		await SheetsHelpers.UpdateRow({ values: values, row: index + 2 });
 		Debug.Log("Role Database has been updated at row " + index + 2);
 	}
 
 	async OnCMD_RefreshRoleMessages(interaction: CommandInteraction<CacheType>)
 	{
-		await this.LoadCacheMessages((await SheetsWrapper.ReadAll()).values);
+		await this.LoadCacheMessages((await SheetsHelpers.ReadAll()).values);
 		this.roleMessages.forEach((_, i) => this.UpdateRoleMessage(i));
 
 		interaction.reply({ content: "All messages are up to date!", ephemeral: true });
@@ -347,7 +347,7 @@ export class RoleReactMod extends DiscordModule
 
 	Initialize()
 	{
-		let dataPromise = SheetsWrapper.ReadAll();
+		let dataPromise = SheetsHelpers.ReadAll();
 
 		ClientHelper.on("ready", async() => {
 			await this.LoadCacheMessages((await dataPromise).values)

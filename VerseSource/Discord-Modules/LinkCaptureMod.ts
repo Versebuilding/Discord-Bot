@@ -1,6 +1,6 @@
 import { CacheType, CommandInteraction, Message, MessageButton, MessageEmbedOptions } from "discord.js";
 import { DiscordModule } from "./DiscordModule";
-import { Buttons, ClientHelper, COMMON_REGEXPS, CreateMCCWithFooterTimer, CustomLock, Debug, Fetch, GetNumberEmoji, MessageReactionCallback, RemoveReactionFromMsg, SheetsWrapper } from "../util-lib"
+import { Buttons, ClientHelper, COMMON_REGEXPS, CreateMCCWithFooterTimer, CustomLock, Debug, Fetch, GetNumberEmoji, MessageReactionCallback, RemoveReactionFromMsg, SheetsHelpers } from "../util-lib"
 import { SlashCommandBuilder } from "@discordjs/builders";
 
 async function OnMessage(msg: Message<boolean>)
@@ -60,7 +60,7 @@ async function CreateInteractableLinkReply(msg: Message<boolean>, links: RegExpM
 					.setDisabled(true)
 					.setStyle("SUCCESS");
 
-			SheetsWrapper.AppendRow({ values: [
+			SheetsHelpers.AppendRow({ values: [
 				channelName, "",
 				`=HYPERLINK("${msg.url}","${msg.author.username}")`,
 				i.user.username,

@@ -1,6 +1,6 @@
 export * from "./types";
 export * from "./util";
-export * from "./SheetsWrapper";
+export * from "./GoogleAPIs";
 export * from "./FetchWrapper";
 export * from "./AsyncLock";
 export * from "./IconLinks";

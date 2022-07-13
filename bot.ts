@@ -11,7 +11,7 @@ async function Startup()
 {
 	try
 	{
-		await tv.SheetsWrapper.Initialize();
+		await tv.GoogleClient.Initialize();
 	}
 	catch (exc)
 	{

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ButtonInteraction, Channel, ColorResolvable, CommandInteraction, GuildBasedChannel, Message, MessageButton, MessageEmbedOptions, MessageOptions, User } from "discord.js";
-import { AskTextQuestion, Authors, Buttons, ClientHelper, CloseMessage, COMMON_REGEXPS, Debug, Delegate, Fetch, GetRoleInfo, IconLinks, Roles, SendAcceptNote, SendConfirmation, SheetsWrapper, ToColor } from "../util-lib";
+import { AskTextQuestion, Authors, Buttons, ClientHelper, CloseMessage, COMMON_REGEXPS, Debug, Delegate, Fetch, GetRoleInfo, IconLinks, Roles, SendAcceptNote, SendConfirmation, SheetsHelpers, ToColor } from "../util-lib";
 import { DiscordModule } from "./DiscordModule";
 import { ProfileColumnHeaders } from "../util-lib/ProfileColumnHeaders";
 import { CommandMenus, HelpMenus, MessageMenu } from "./Menus";
@@ -100,8 +100,8 @@ export class ProfilesMod extends DiscordModule
 
 	static async GetUserDataByID(user_id: string, col: ProfileColumnHeaders): Promise<string>
 	{
-		let users = await SheetsWrapper.ReadCol(
-			SheetsWrapper.toBase26(ProfileColumnHeaders["User ID"]), "Profiles");
+		let users = await SheetsHelpers.ReadCol(
+			SheetsHelpers.toBase26(ProfileColumnHeaders["User ID"]), "Profiles");
 		let index = users.findIndex(u => u == user_id);
 
 		if (index == -1)
@@ -113,13 +113,13 @@ export class ProfilesMod extends DiscordModule
 				Debug.Warning("User was not found in table nor in server! (id=" + user_id + ")");
 			return null;
 		}
-		else return await SheetsWrapper.ReadCell(index + 1, SheetsWrapper.toBase26(col), "Profiles", process.env.GOOGLE_DATA_DOCUMENT);
+		else return await SheetsHelpers.ReadCell(index + 1, SheetsHelpers.toBase26(col), "Profiles", process.env.GOOGLE_DATA_DOCUMENT);
 	}
 
 	static async GetAllUserDataByID(user_id: string): Promise<string[]>
 	{
-		let users = await SheetsWrapper.ReadCol(
-			SheetsWrapper.toBase26(ProfileColumnHeaders["User ID"]), "Profiles");
+		let users = await SheetsHelpers.ReadCol(
+			SheetsHelpers.toBase26(ProfileColumnHeaders["User ID"]), "Profiles");
 
 		let index = users.findIndex(u => u == user_id);
 
@@ -132,13 +132,13 @@ export class ProfilesMod extends DiscordModule
 				Debug.Warning("User was not found in table nor in server! (id=" + user_id + ")");
 			return null;
 		}
-		else return await SheetsWrapper.ReadRow(index + 1, "Profiles", process.env.GOOGLE_DATA_DOCUMENT);
+		else return await SheetsHelpers.ReadRow(index + 1, "Profiles", process.env.GOOGLE_DATA_DOCUMENT);
 	}
 
 	static async SetUserDataByID(user_id: string, col: ProfileColumnHeaders, data: string)
 	{
-		let users = await SheetsWrapper.ReadCol(
-			SheetsWrapper.toBase26(ProfileColumnHeaders["User ID"]), "Profiles");
+		let users = await SheetsHelpers.ReadCol(
+			SheetsHelpers.toBase26(ProfileColumnHeaders["User ID"]), "Profiles");
 		let index = users.findIndex(u => u == user_id);
 
 		ProfilesMod.SetUserDataByIndex(index, col, data);
@@ -149,9 +149,9 @@ export class ProfilesMod extends DiscordModule
 		if (user_index < 0)
 			return false;
 
-		await SheetsWrapper.UpdateCell(
+		await SheetsHelpers.UpdateCell(
 			data,
-			`${SheetsWrapper.toBase26(col)}${user_index + 1}`,
+			`${SheetsHelpers.toBase26(col)}${user_index + 1}`,
 			"Profiles");
 		return true;
 	}
@@ -201,7 +201,7 @@ export class ProfilesMod extends DiscordModule
 				iconURL: mem.displayAvatarURL()
 			},
 			color: color,
-			title: `${ mem.nickname ?? "<Server Nickname>"}`,
+			title: `${ (mem.displayName != fullName) ? mem.nickname ?? "<Server Nickname>": mem.displayName }`,
 			description: [
 				["👔 Bio", bio],
 				["🗺️ Location", location],
@@ -292,8 +292,11 @@ const personalInfo: [
 		// If user is an Admin, the bot won't be able to set username.
 		if (mem.roles.cache.has("848806375668842511")) return null;
 		// If user already has a matching username.
-		if (mem.displayName == msg.content) return null;
-
+		if (mem.displayName == msg.content)
+		{
+			mem.nickname = mem.displayName;
+			return null;
+		}
 		const desc = (!mem.nickname) ?
 			`You currently do not have a nickname for The Verse server. Doing this will change your display name for your profile inside the server.` :
 			`You already have a nickname in the server: \`${mem.nickname}\`, would you like to update this username?`;
@@ -435,7 +438,7 @@ CommandMenus.profileSetup.menu = async (btn: ButtonInteraction) =>
 	// Try to create entry if one was not found.
 	if (!getting)
 	{
-		await SheetsWrapper.AppendRow({
+		await SheetsHelpers.AppendRow({
 			values: [btn.user.id],
 			sheetname: "Profiles"
 		});

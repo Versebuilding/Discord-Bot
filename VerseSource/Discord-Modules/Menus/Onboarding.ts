@@ -4,3 +4,7 @@ import { HelpMenus } from "./MenuDeclarations";
 HelpMenus.OnboardingHome.allowed = Filters.RoleAuth([Roles.Creator.id]);
 
 
+// HelpMenus.OnboardingHome.menu = (i) =>
+// {
+// 	return {}
+// }

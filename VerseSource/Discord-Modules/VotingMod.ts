@@ -117,6 +117,7 @@ async function OnCMD_Poll(cmd: CommandInteraction)
 
 	await cmd.reply({ embeds: [{
 		author: { iconURL: mem.displayAvatarURL(), name: mem.displayName },
+		color: "YELLOW",
 		title: anon ? "Anonymous Poll" : "Public Poll",
 		description: desc,
 		fields: options.map((opt, index) => ({
