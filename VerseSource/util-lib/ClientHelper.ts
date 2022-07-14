@@ -2,8 +2,9 @@ import { Routes } from "discord-api-types/v9";
 import { CommandInteraction, ButtonInteraction, ClientEvents, Awaitable, Client, Interaction, Intents, ModalSubmitInteraction } from "discord.js";
 import { CustomLock } from "./AsyncLock";
 import { Filters } from "./Filters";
-import { BaseInteraction, Delegate, SlashCommand } from "./types"
-import { Debug } from "./util";
+import { BaseInteraction, Delegate, SlashCommand } from "./types";
+import * as assert from "assert";
+import { Debug } from "../Logging";
 
 export interface CallbackOptions<K extends keyof ClientEvents>
 {
@@ -19,9 +20,9 @@ interface ClientEventListeners<K extends keyof ClientEvents>
 
 export class ClientHelper
 {
-	static Login(token: string)
+	static async Login(token: string)
 	{
-		ClientHelper.client.login(token);
+		await ClientHelper.client.login(token);
 		ClientHelper.loggedIn = true;
 
 		// Save space as this is only needed for validation.
@@ -62,11 +63,11 @@ export class ClientHelper
 		execute: Delegate<[CommandInteraction]>,
 		filter?: Delegate<[CommandInteraction], boolean>
 	) {
-		Debug.Assert(!ClientHelper.loggedIn);
+		assert(!ClientHelper.loggedIn);
 
 		if (cmd != null) {
 			ClientHelper.slashCommands.push(cmd);
-			Debug.Assert(!ClientHelper.commandNames.has(cmd.name),
+			assert(!ClientHelper.commandNames.has(cmd.name),
 				"ClientHelper.reg_cmd() already has registered command with name '" + cmd.name + "'");
 			ClientHelper.commandNames.add(cmd.name);
 		}
@@ -78,15 +79,16 @@ export class ClientHelper
 		);
 	}
 
-	static reg_btn(
-		key: string | null,
+	static reg_btn<T extends string | null>(
+		key: T,
 		execute: Delegate<[ButtonInteraction]>,
-		filter?: Delegate<[ButtonInteraction], boolean>
+		filter?: Delegate<[ButtonInteraction], boolean>,
+		starts: boolean = false,
 	) {
-		Debug.Assert(!ClientHelper.loggedIn);
+		assert(!ClientHelper.loggedIn);
 
 		if (key) {
-			Debug.Assert(!ClientHelper.buttonIds.has(key),
+			assert(!ClientHelper.buttonIds.has(key),
 				"ClientHelper.reg_btn() already has registered button with id '" + key + "'");
 			ClientHelper.buttonIds.add(key);
 		}
@@ -94,21 +96,22 @@ export class ClientHelper
 		ClientHelper.on(
 			"interactionCreate",
 			execute as Delegate<[Interaction]>,
-			Filters.Merge(Filters.Button(key), filter)
+			Filters.Merge(Filters.Button(key, starts), filter)
 		);
 
 		return key;
 	}
 
-	static reg_mdl(
-		key: string | null,
+	static reg_mdl<T extends string | null>(
+		key: T,
 		execute: Delegate<[ModalSubmitInteraction]>,
-		filter?: Delegate<[ModalSubmitInteraction], boolean>
+		filter?: Delegate<[ModalSubmitInteraction], boolean>,
+		starts: boolean = false,
 	) {
-		Debug.Assert(!ClientHelper.loggedIn);
+		assert(!ClientHelper.loggedIn);
 
 		if (key) {
-			Debug.Assert(!ClientHelper.modalIds.has(key),
+			assert(!ClientHelper.modalIds.has(key),
 				"ClientHelper.reg_mdl() already has registered button with id '" + key + "'");
 			ClientHelper.modalIds.add(key);
 		}
@@ -116,7 +119,7 @@ export class ClientHelper
 		ClientHelper.on(
 			"interactionCreate",
 			execute as Delegate<[Interaction]>,
-			Filters.Merge(Filters.Modal(key), filter)
+			Filters.Merge(Filters.Modal(key, starts), filter)
 		);
 
 		return key;
@@ -134,8 +137,8 @@ export class ClientHelper
 
 				if ((i.isButton() || i.isModalSubmit()))
 				{
-					const btnKey = i.message.id ?? i.customId;
-					if (CustomLock.TryAquireKey(btnKey))
+					const btnKey = i.message?.id ?? i.customId;
+					if (CustomLock.TryAcquireKey(btnKey))
 					{
 						try {
 							const matches = listeners.values.filter(l => !l.filter || l.filter(...args));
@@ -144,10 +147,10 @@ export class ClientHelper
 								await l.execute(...args);
 
 						} catch (err) {
-							Debug.Error(err);
+							Debug.LogError(err);
 							if (!i.replied && !i.deferred)
 								await i.reply({ content: "There was an internal error!", ephemeral: true })
-									.catch(() => (i as BaseInteraction).followUp({ content: "There was an internal error!", ephemeral: true })).catch(Debug.Error);
+									.catch(() => (i as BaseInteraction).followUp({ content: "There was an internal error!", ephemeral: true })).catch(Debug.LogError);
 						}
 	
 						// if (!i.replied && !i.deferred)
@@ -186,7 +189,6 @@ export class ClientHelper
 		{
 			const { REST } = require('@discordjs/rest');
 			const rest = new REST({ version: '9' }).setToken(process.env.DISCORD_TOKEN);
-			console.log('Started refreshing application (/) commands.');
 	
 			await rest.put(
 				Routes.applicationGuildCommands(
@@ -195,11 +197,10 @@ export class ClientHelper
 				),
 				{ body: ClientHelper.slashCommands },
 			);
-			console.log('Successfully reloaded application (/) commands.');
 		}
 		catch (error)
 		{
-			console.error(error);
+			Debug.LogError(error);
 		}
 	}
 }

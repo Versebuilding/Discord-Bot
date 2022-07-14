@@ -1,121 +1,17 @@
 import { APIEmbed, APIMessage } from 'discord-api-types/v9';
 import { Message, Client, CacheType, ButtonInteraction, MessageActionRow, MessageButton, EmojiResolvable, Util, CollectorFilter, MessageReaction, User, Collection, MessageOptions, InteractionCollector, MessageComponentInteraction, MessageComponentCollectorOptions, CollectorResetTimerOptions, PartialTextBasedChannelFields, MessageEmbed, MessageEmbedOptions, MessageActionRowComponent, MessagePayload, MessageEditOptions, Awaitable, ColorResolvable } from "discord.js";
 import { InterfaceType, readBuilderProgram } from 'typescript';
+import { Debug } from '../Logging';
 import { CustomLock } from './AsyncLock';
-import { ClientHelper } from './ClientCallbackHelpers';
+import { ClientHelper } from './ClientHelper';
 import { Fetch } from "./FetchWrapper";
 import { FuncAble } from './types';
 const path = require('node:path');
 
-export class Debug
+
+export function GetLinksFromString(str: string): RegExpMatchArray
 {
-	private static log = "## Beginning of log ##\n";
-
-	static Log(...args: any[])
-	{
-		const filedesc = Debug.GetCallingFileHeader();
-
-		// Create Log:
-		var out = "";
-		if (args.length == 0) out = "\n";
-		else for (let i = 0; i < args.length; i++)
-		{
-			out += filedesc;
-			if (!args[i])
-				out += "null";
-			else if (args[i].toString === Object.prototype.toString)
-			{
-				const str = JSON.stringify(args[i], null, 1);
-				out += str.substring(1, str.length - 1);
-			} else
-			{
-				let str: string = args[i].toString();
-				while (str.startsWith("\n")) {
-					out = "\n" + out;
-					str = str.substring(1, str.length);
-				}
-				out += str;
-			}
-
-			out += "\n";
-		}
-
-		Debug.log += out;
-		console.log(out.substring(0, out.length - 1));
-		Debug.TrimLog();
-	}
-
-	static LogError(message: string, error: Error)
-	{
-		const filedesc = Debug.GetCallingFileHeader();
-		Debug.log += filedesc + message + "\n" + error.message + "\n";
-		console.error(filedesc + message, error);
-		Debug.TrimLog();
-	}
-
-	static Error(error: Error)
-	{
-		const filedesc = Debug.GetCallingFileHeader();
-		Debug.log += filedesc + error.message + "\n";
-		console.error(filedesc, error);
-		Debug.TrimLog();
-	}
-
-	static Warning(message: string)
-	{
-		Debug.Log("<<WARNING>> " + message);
-	}
-
-	static Assert(expr: any, message?: string)
-	{
-		if (expr) return;
-		let e = new Error("Assertion Failed!");
-		if (message)
-			Debug.LogError(message, e);
-		else Debug.Error(e);
-	}
-
-	static Print(msg: MessageOptions)
-	{
-		try {
-			if (ClientHelper.client.isReady())
-				Fetch.TextChannel("978188746564468746").then(c => { c.send(msg); });
-			else
-				Debug.Log("Client is not ready yet! Cannot Debug.Print yet!");
-
-			const filedesc = Debug.GetCallingFileHeader();
-			const out = filedesc + "[Print] >> " + MessageOptionsStringShorthand(msg);
-
-			Debug.log += out + "\n";
-			console.log(out);
-			Debug.TrimLog();
-
-		} catch { console.error("There was an error printing to discord!"); }
-	}
-
-	private static GetCallingFileHeader(): string
-	{
-		const err = new Error();
-		Error.prepareStackTrace = (_, stack) => stack;
-		const stack: NodeJS.CallSite[] = err.stack as unknown as NodeJS.CallSite[];
-		Error.prepareStackTrace = undefined;
-
-		const callingFile = { name: stack[2].getFileName(), line: stack[2].getLineNumber() };
-
-		return "[" + path.basename(callingFile.name, path.extname(callingFile.name)) +
-		": " + callingFile.line + "] ";
-	}
-
-	private static TrimLog()
-	{
-		const trimto = Debug.log.length - 7000;
-		if (trimto > 0)
-		{
-			Debug.log = Debug.log.substring(trimto, Debug.log.length);
-		}
-	}
-
-	static GetLog() { return Debug.log; }
+	return str.match(COMMON_REGEXPS.URL);
 }
 
 function MessageOptionsStringShorthand(msg: MessageOptions): string
@@ -419,7 +315,7 @@ async function _UpdateFooterTimer(message: Message<boolean>, endTime: number, in
 	const key = message?.id;
 
 	try {
-		if (!(key && CustomLock.TryAquireKey(key) && await message.fetch(true)))
+		if (!(key && CustomLock.TryAcquireKey(key) && await message.fetch(true)))
 		{
 			if (intervaler) clearInterval(intervaler);
 			return;
@@ -503,7 +399,7 @@ export async function AskTextQuestion({
 
 		while(true)
 		{
-			console.log("Asking...");
+			Debug.Log("Asking...");
 			const msgs = (await ansChannel.awaitMessages({
 				filter: (msg) => !msg.author.bot,
 				max: 1,
@@ -522,10 +418,10 @@ export async function AskTextQuestion({
 				throw new Error("Asking question did not time out, yet the answer message was null.");
 
 			a = msgs.first();
-			console.log("...answered: " + a.content);
+			Debug.Log("...answered: " + a.content);
 
 			let err = await validate(a);
-			console.log("Validation complete: " + err);
+			Debug.Log("Validation complete: " + err);
 
 			if (!err) break;
 
@@ -545,7 +441,7 @@ export async function AskTextQuestion({
 	{
 		if (useTimer && intervaler)
 		{
-			console.log("Clearing interval");
+			Debug.Log("Clearing interval");
 			clearInterval(intervaler);
 			q.embeds[q.embeds.length - 1].setFooter({ text: ""});
 			await q.edit({ embeds: q.embeds}).catch(/*Debug.Error*/ () => {});
@@ -615,7 +511,7 @@ export function ToColor(str: string): ColorResolvable | null
 			end
 		).split(",").map(s => parseInt(s.trim()));
 
-		console.log("RGB: ", rgb);
+		Debug.Log("RGB: ", rgb);
 		if (rgb.length == 3 && !rgb.find(c => isNaN(c) || c < 0 || c > 255))
 			return [rgb[0], rgb[1], rgb[2]];
 		return null;

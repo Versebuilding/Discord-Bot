@@ -1,7 +1,21 @@
 import { CacheType, CommandInteraction, Message, MessageButton, MessageEmbedOptions } from "discord.js";
-import { DiscordModule } from "./DiscordModule";
-import { Buttons, ClientHelper, COMMON_REGEXPS, CreateMCCWithFooterTimer, CustomLock, Debug, Fetch, GetNumberEmoji, MessageReactionCallback, RemoveReactionFromMsg, SheetsHelpers } from "../util-lib"
+import { Authors, Buttons, ClientHelper, COMMON_REGEXPS, CreateMCCWithFooterTimer, CustomLock, Fetch, GetLinksFromString, GetNumberEmoji, MessageReactionCallback, RemoveReactionFromMsg, SheetsHelpers } from "../util-lib"
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { Debug } from "../Logging";
+
+ClientHelper.on("messageCreate", OnMessage,
+	m => !m.author.bot && m.channel.type != "DM"
+);
+
+ClientHelper.reg_cmd(
+	new SlashCommandBuilder()
+		.setName("upload-link-from-message")
+		.setDescription("Pulls all URLs from a message and lets you post to the MDD")
+		.addStringOption(option =>
+			option.setName("message-link")
+				.setDescription("The link to the target message.")
+				.setRequired(true)),
+	OnCMD_UploadFromMessage);
 
 async function OnMessage(msg: Message<boolean>)
 {
@@ -22,11 +36,6 @@ async function OnMessage(msg: Message<boolean>)
 		Debug.Log("No links found in message.");
 }
 
-export function GetLinksFromString(str: string): RegExpMatchArray
-{
-	return str.match(COMMON_REGEXPS.URL);
-}
-
 async function CreateInteractableLinkReply(msg: Message<boolean>, links: RegExpMatchArray)
 {
 	const channelName = (await Fetch.Channel(msg.channelId)).name;
@@ -42,7 +51,7 @@ async function CreateInteractableLinkReply(msg: Message<boolean>, links: RegExpM
 		color: "DARK_GREEN",
 		title: "Save Links to Master Directory Doc?",
 		description: content,
-		author: LinkCaptureMod.author,
+		author: Authors.LinkCap,
 	};
 
 	var replym = await msg.reply({ embeds: [embed], components: comps });
@@ -75,7 +84,7 @@ async function CreateInteractableLinkReply(msg: Message<boolean>, links: RegExpM
 				i.reply({ embeds: [{
 					title: "Link was posted",
 					description: "Check out the links posted in [Chat Links > Bot Dump](https://docs.google.com/spreadsheets/d/1UHZBH9bjRuR1dnUsH6UcVL-KpYPTBp00AD4L_9SW5ZI/edit#gid=1566372611&range=A13:G13) on the Master Directory Document",
-					author: LinkCaptureMod.author
+					author: Authors.LinkCap
 				}], ephemeral: true });
 			});
 		}} catch {
@@ -94,7 +103,7 @@ async function CreateInteractableLinkReply(msg: Message<boolean>, links: RegExpM
 					color: "DARK_GREEN",
 					description: content +
 					"\nCheck out the links posted in [Chat Links > Bot Dump](https://docs.google.com/spreadsheets/d/1UHZBH9bjRuR1dnUsH6UcVL-KpYPTBp00AD4L_9SW5ZI/edit#gid=1566372611&range=A13:G13)",
-					author: LinkCaptureMod.author,
+					author: Authors.LinkCap,
 				}], components: [] }));
 
 				Debug.Log("Interactions have expired and message has been edited");
@@ -122,7 +131,7 @@ async function OnCMD_UploadFromMessage(i: CommandInteraction<CacheType>)
 			title: "Done!",
 			color: "GREEN",
 			description: "Replied to the provided message",
-			author: LinkCaptureMod.author
+			author: Authors.LinkCap
 		}], ephemeral: true });
 	
 		CreateInteractableLinkReply(msg, GetLinksFromString(msg.content));
@@ -133,33 +142,7 @@ async function OnCMD_UploadFromMessage(i: CommandInteraction<CacheType>)
 			title: "Error!",
 			color: "RED",
 			description: e.toString(),
-			author: LinkCaptureMod.author
+			author: Authors.LinkCap
 		}], ephemeral: true });
 	})
 }
-
-export class LinkCaptureMod extends DiscordModule
-{
-	static readonly author = {
-		name: "Link Capture",
-		iconURL: "https://cdn-icons-png.flaticon.com/512/1057/1057247.png"
-	};
-
-	Initialize()
-	{
-		ClientHelper.on("messageCreate", OnMessage,
-			m => !m.author.bot && m.channel.type != "DM"
-		);
-
-		ClientHelper.reg_cmd(
-			new SlashCommandBuilder()
-				.setName("upload-link-from-message")
-				.setDescription("Pulls all URLs from a message and lets you post to the MDD")
-				.addStringOption(option =>
-					option.setName("message-link")
-						.setDescription("The link to the target message.")
-						.setRequired(true)),
-			OnCMD_UploadFromMessage);
-	}
-}
-

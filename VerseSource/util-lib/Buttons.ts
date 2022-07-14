@@ -1,7 +1,7 @@
 import { ButtonInteraction, MessageButton, EmojiIdentifierResolvable, MessageActionRow } from "discord.js";
-import { ClientHelper } from "./ClientCallbackHelpers";
+import { Debug } from "../Logging";
+import { ClientHelper } from "./ClientHelper";
 import { PartialButtonOptions } from "./types";
-import { Debug } from "./util";
 
 export const Buttons =
 {
@@ -60,7 +60,7 @@ export const Buttons =
 	ButtonsToRows: (...buttons: MessageButton[]) => Buttons.AddButtonsToRows([...buttons], []),
 	ButtonsToLimitedRows: (buttons: MessageButton[], rowLimit: number): MessageActionRow[] =>
 	{
-		Debug.Assert(rowLimit > 0 && rowLimit < 5);
+		(rowLimit > 0 && rowLimit < 5);
 		const comps: MessageActionRow[] = [];
 
 		for(var i = 0; i < Math.ceil(buttons.length / rowLimit); i++)
@@ -95,13 +95,13 @@ export const Buttons =
 	NullCall: "null call",
 	NotImplemented: "not implemented",
 	NotReg: (context: any) => {
-		Debug.Warning("Not Registered warning!!: " + context?.toString());
+		Debug.LogWarning("Not Registered warning!!: " + context?.toString());
 		return "not registered";
 	}
 }
 
 ClientHelper.reg_btn(Buttons.NullCall, (i: ButtonInteraction) =>
-	Debug.Error(new Error("Interaction is a Null interaction. This should never be called!")));
+	Debug.LogError(new Error("Interaction is a Null interaction. This should never be called!")));
 ClientHelper.reg_btn(Buttons.NotImplemented, (i: ButtonInteraction) =>
 	i.reply("This button has not been implemented yet! If you think this is a problem, please reach out the admin at The Verse."));
 ClientHelper.reg_btn("not registered", (i: ButtonInteraction) =>

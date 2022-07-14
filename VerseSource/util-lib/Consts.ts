@@ -39,7 +39,17 @@ export const Authors = {
 	Vote: {
 		name: "Vote",
 		icon_url: IconLinks.Vote,
-	}
+	},
+
+	LinkCap: {
+		name: "Link Capture",
+		iconURL: "https://cdn-icons-png.flaticon.com/512/1057/1057247.png"
+	},
+
+	RoleAssign: {
+		iconURL: "https://cdn-icons-png.flaticon.com/512/5146/5146077.png",
+		name: "Role Assign"
+	},
 }
 
 export const Channels = 
@@ -49,6 +59,7 @@ export const Channels =
 	applications: "985232422847258625",
 	bot_setup: "849353615222898709",
 	announcements: "979244080494182430",
+	bot_log: "978188746564468746",
 }
 
 export const Roles =

@@ -1,73 +1,67 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ButtonInteraction, CommandInteraction } from "discord.js";
-import { Authors, Buttons, ClientHelper, Debug, Fetch, Filters, GetNumberEmoji } from "../util-lib";
-import { DiscordModule } from "./DiscordModule";
+import { Authors, Buttons, ClientHelper, Fetch, Filters, GetNumberEmoji } from "../util-lib";
 import * as crypto from "crypto";
+import { Debug } from "../Logging";
 
-const pollButtonName = "RegisterVoteForPollButton";
 
-export class VotingMod extends DiscordModule
-{
-	Initialize(): void
-	{
-		ClientHelper.on("interactionCreate", PollButton, Filters.Button(pollButtonName, true));
+const pollButtonName =
+	ClientHelper.reg_btn("RegisterVoteForPollButton", PollButton, undefined, true);
 
-		ClientHelper.reg_cmd(
-			new SlashCommandBuilder()
-				.setName("create-poll")
-				.setDescription("Create a message that lets members vote on options")
-				.addStringOption(options => options
-					.setName("description")
-					.setDescription("Description that will be included with the poll")
-					.setRequired(true))
-				.addBooleanOption(options => options
-					.setName("anonymous")
-					.setDescription("If the poll should be anonymous (default false)")
-					.setRequired(false))
-				.addNumberOption(options => options
-					.setName("max-votes")
-					.setDescription("Number of options each member can select (default 1)")
-					.setRequired(false))
-				.addStringOption(options => options
-					.setName("option-1")
-					.setDescription("A votable option for the message")
-					.setRequired(false))
-				.addStringOption(options => options
-					.setName("option-2")
-					.setDescription("A votable option for the message")
-					.setRequired(false))
-				.addStringOption(options => options
-					.setName("option-3")
-					.setDescription("A votable option for the message")
-					.setRequired(false))
-				.addStringOption(options => options
-					.setName("option-4")
-					.setDescription("A votable option for the message")
-					.setRequired(false))
-				.addStringOption(options => options
-					.setName("option-5")
-					.setDescription("A votable option for the message")
-					.setRequired(false))
-				.addStringOption(options => options
-					.setName("option-6")
-					.setDescription("A votable option for the message")
-					.setRequired(false))
-				.addStringOption(options => options
-					.setName("option-7")
-					.setDescription("A votable option for the message")
-					.setRequired(false))
-				.addStringOption(options => options
-					.setName("option-8")
-					.setDescription("A votable option for the message")
-					.setRequired(false))
-				.addStringOption(options => options
-					.setName("option-9")
-					.setDescription("A votable option for the message")
-					.setRequired(false)),
-			OnCMD_Poll,
-		);
-	}
-}
+ClientHelper.reg_cmd(
+	new SlashCommandBuilder()
+		.setName("create-poll")
+		.setDescription("Create a message that lets members vote on options")
+		.addStringOption(options => options
+			.setName("description")
+			.setDescription("Description that will be included with the poll")
+			.setRequired(true))
+		.addBooleanOption(options => options
+			.setName("anonymous")
+			.setDescription("If the poll should be anonymous (default false)")
+			.setRequired(false))
+		.addNumberOption(options => options
+			.setName("max-votes")
+			.setDescription("Number of options each member can select (default 1)")
+			.setRequired(false))
+		.addStringOption(options => options
+			.setName("option-1")
+			.setDescription("A votable option for the message")
+			.setRequired(false))
+		.addStringOption(options => options
+			.setName("option-2")
+			.setDescription("A votable option for the message")
+			.setRequired(false))
+		.addStringOption(options => options
+			.setName("option-3")
+			.setDescription("A votable option for the message")
+			.setRequired(false))
+		.addStringOption(options => options
+			.setName("option-4")
+			.setDescription("A votable option for the message")
+			.setRequired(false))
+		.addStringOption(options => options
+			.setName("option-5")
+			.setDescription("A votable option for the message")
+			.setRequired(false))
+		.addStringOption(options => options
+			.setName("option-6")
+			.setDescription("A votable option for the message")
+			.setRequired(false))
+		.addStringOption(options => options
+			.setName("option-7")
+			.setDescription("A votable option for the message")
+			.setRequired(false))
+		.addStringOption(options => options
+			.setName("option-8")
+			.setDescription("A votable option for the message")
+			.setRequired(false))
+		.addStringOption(options => options
+			.setName("option-9")
+			.setDescription("A votable option for the message")
+			.setRequired(false)),
+	OnCMD_Poll,
+);
 
 async function OnCMD_Poll(cmd: CommandInteraction)
 {
@@ -154,7 +148,7 @@ async function PollButton(btn: ButtonInteraction)
 			description: "Poll message has a bad format! We could not register a vote." }],
 			ephemeral: true
 		});
-		Debug.Error(new Error("Poll message has a bad format! We could not register a vote."));
+		Debug.LogError(new Error("Poll message has a bad format! We could not register a vote."));
 		return;
 	}
 
@@ -224,7 +218,7 @@ async function PollButton(btn: ButtonInteraction)
 	replace = "Vote Count: `" + (replace.split("\n").length - 1) + "`" + replace;
 	content.embeds[0].fields[index].value = replace;
 
-	await msg.edit(content).catch(Debug.Error);
+	await msg.edit(content).catch(Debug.LogError);
 	await def_promise;
 }
 

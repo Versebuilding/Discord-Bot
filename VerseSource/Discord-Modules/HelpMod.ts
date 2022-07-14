@@ -1,27 +1,20 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
 import { Authors, Buttons, ClientHelper } from "../util-lib";
-import { DiscordModule } from "./DiscordModule";
 import { HelpMenus } from "./Menus";
 
-export class HelpMod extends DiscordModule
-{
-	Initialize(): void
-	{
-		// ClientHelper.on("guildMemberAdd", async (member: GuildMember) =>
-		// {
-		// 	if (member.user.bot) return;
-		// 	member.send("Welcome to the server! Please read the rules and follow them.");
-		// });
+// ClientHelper.on("guildMemberAdd", async (member: GuildMember) =>
+// {
+// 	if (member.user.bot) return;
+// 	member.send("Welcome to the server! Please read the rules and follow them.");
+// });
 
-		ClientHelper.reg_cmd(
-			new SlashCommandBuilder()
-				.setName("help")
-				.setDescription("Opens the main hub of information for The Verse and our Discord"),
-			OnCMD_Help,
-		)
-	}
-}
+ClientHelper.reg_cmd(
+	new SlashCommandBuilder()
+		.setName("help")
+		.setDescription("Opens the main hub of information for The Verse and our Discord"),
+	OnCMD_Help,
+)
 
 async function OnCMD_Help(i: CommandInteraction)
 {

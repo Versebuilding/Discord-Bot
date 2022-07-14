@@ -1,6 +1,8 @@
 import { APIEmbed } from "discord-api-types/v9";
-import { Awaitable, ButtonInteraction, EmbedField, EmbedFieldData, EmojiIdentifierResolvable, EmojiResolvable, Message, MessageButtonOptions, MessageButtonStyle, MessageEmbed, MessageEmbedOptions, MessageOptions  } from "discord.js";
-import { BaseInteraction, Buttons, ClientHelper, CloseMessage, Debug, Delegate, Fetch, MessageData, SendConfirmation, Authors, FuncAble, ResolveFuncAble, PartialButtonOptions } from "../../util-lib";
+import { ButtonInteraction, EmbedField, EmojiIdentifierResolvable, MessageEmbed, MessageEmbedOptions, MessageOptions  } from "discord.js";
+import { BaseInteraction, Buttons, ClientHelper, CloseMessage, Fetch, MessageData, SendConfirmation, Authors, FuncAble, ResolveFuncAble, PartialButtonOptions } from "../../util-lib";
+import * as assert from "assert";
+import { Debug } from "../../Logging";
 
 type RegisterOptions = "NONE" | "OPEN" | "DMOPEN" | "OPEN+DMOPEN";
 
@@ -13,7 +15,7 @@ export class MessageMenu
 	regFlags: RegisterOptions;
 
 	menu?: FuncAble<MessageData, [BaseInteraction]>;
-	exitMessage?: FuncAble<string, [BaseInteraction]>;
+	exitMessage?: FuncAble<string | null, [BaseInteraction]>;
 
 	constructor({ name, desc, emoji, regFlags = "NONE" }: {
 		name: string;
@@ -21,7 +23,7 @@ export class MessageMenu
 		emoji: EmojiIdentifierResolvable;
 		regFlags?: RegisterOptions
 	}) {
-		Debug.Assert(name.length < 40);
+		assert(name.length < 40);
 		this.name = name;
 		this.desc = desc;
 		this.emoji = emoji;
@@ -60,7 +62,7 @@ export class MessageMenu
 
 	async Open(i: BaseInteraction)
 	{
-		Debug.Assert(this);
+		assert(this);
 		if (!this.menu)
 			throw new Error("'" + this.name + "'.menu has not been set yet!");
 
@@ -75,7 +77,7 @@ export class MessageMenu
 	/** Binds this to MessageMenu.Open() and adds an interaction reply. */
 	JustOpen(): (i: BaseInteraction) => Promise<void>
 	{
-		Debug.Assert(this.regFlags == "OPEN" || this.regFlags == "OPEN+DMOPEN");
+		assert(this.regFlags == "OPEN" || this.regFlags == "OPEN+DMOPEN");
 		var _this = this;
 		return async (i) => {
 			await _this.Open(i);
@@ -87,7 +89,7 @@ export class MessageMenu
 
 	async DMOpen(i: BaseInteraction)
 	{
-		Debug.Assert(this);
+		assert(this);
 		await i.user.send(await ResolveFuncAble(this.menu, i));
 	}
 
@@ -95,7 +97,7 @@ export class MessageMenu
 	JustDMOpen(): (i: BaseInteraction) => Promise<void>
 	{
 		
-		Debug.Assert(this.regFlags == "DMOPEN" || this.regFlags == "OPEN+DMOPEN");
+		assert(this.regFlags == "DMOPEN" || this.regFlags == "OPEN+DMOPEN");
 		var _this = this;
 		return async (i) => {
 
@@ -129,11 +131,11 @@ export class MessageMenu
 		}
 		else
 		{
-			Debug.Error(new Error("Menu was not set!"));
+			Debug.LogError(new Error("Menu was not set!"));
 			const errorMessage = "There was an internal error opening a message to respond to this button!";
 
 			await btn.reply({ content: errorMessage, ephemeral: true }).catch(async () => 
-				(await channelPromise).send(errorMessage).catch(Debug.Error));
+				(await channelPromise).send(errorMessage).catch(Debug.LogError));
 		}
 	}
 
@@ -182,7 +184,7 @@ export class MessageMenu
 		var thisMenu = this;
 		return ClientHelper.reg_btn("SWAP:" + this.name + "->" + otherMenu.name, async function(i)
 		{
-			console.log("Swapping...");
+			Debug.Log("Swapping...");
 			i.deferUpdate();
 			
 			const conf = await thisMenu.ConfExit(i)
@@ -207,7 +209,7 @@ export class MessageMenu
 		sub_menus: MessageMenu[],
 		styles: FuncAble<PartialButtonOptions, [BaseInteraction]>[] = []): void
 	{
-		Debug.Assert(!ClientHelper.loggedIn);
+		assert(!ClientHelper.loggedIn);
 
 		var labelPre = "DirMenu_" + this.name + "|"; 
 		const ids = sub_menus.map(menu =>

@@ -5,6 +5,6 @@ export * from "./MenuDeclarations";
 // No exports, but these will modify the menu objects.
 import "./HelpMenus";
 import "./FirstApplication";
-import "./ConstMessages";
 import "./InternalContent";
 import "./Onboarding";
+import "./ProfileSetup";

@@ -1,53 +1,69 @@
-import { MessageOptions } from "discord.js";
-import * as tv from "./VerseSource";
-import { Fetch, Channels, Authors, Buttons, HelpMenus, CommandMenus } from "./VerseSource";
-
 console.log("<><> Start bot of script <><>");
 
-// Run dotenv
-require('dotenv').config();
+
+console.log("Loading and configuring Debugging/Logging tools...");
+
+import { Debug } from "./VerseSource/Logging";
+
+
+Debug.Log("Loading and configuring 'dotenv'...");
+
+import * as dotenv from "dotenv";
+dotenv.config();
+
+
+Debug.Log("Loading and configuring source scripts....");
+
+import { GoogleClient, ClientHelper } from "./VerseSource";
+
+Debug.Log("Initializing all mods...");
+
+// Logging mod comes first so that its listener is before the ClientHandler's.
+import "./VerseSource/Discord-Modules/LoggingMod";
+import "./VerseSource/Discord-Modules/CoreMod";
+import "./VerseSource/Discord-Modules/ProfilesMod";
+import "./VerseSource/Discord-Modules/RoleReactMod";
+import "./VerseSource/Discord-Modules/LinkCaptureMod";
+import "./VerseSource/Discord-Modules/HelpMod";
+import "./VerseSource/Discord-Modules/VotingMod";
+
+// Activate the webpage for the log
+Debug.Log("Loading and initializing web server...");
+import "./VerseSource/weblib";
+
 
 async function Startup()
 {
 	try
 	{
-		await tv.GoogleClient.Initialize();
+		Debug.Log("Initializing Google API Client...");
+		await GoogleClient.Initialize();
 	}
 	catch (exc)
 	{
-		console.error(exc);
-		console.error(">>>CRITICAL ERROR<<< There was an error with initailizing the google api.");
-		return;
+		Debug.Critical("There was an error with initializing the google api.", exc);
+		throw new Error("There was an error with initializing the google api.");
 	}
 
-	// Select the modules that should be loaded
-	const mods: tv.DiscordModule[] = [
-		new tv.LoggingMod(),
-		new tv.CoreMod(),
-		//new tv.TimeConverterMod(),
-		new tv.ProfilesMod(),
-		new tv.RoleReactMod(),
-		new tv.LinkCaptureMod(),
-		new tv.HelpMod(),
-		new tv.VotingMod(),
-	]
-
-	mods.forEach(element => element.Initialize());
-
 	// Setup modules and their respective commands
-	tv.ClientHelper.PushCommands();
+	Debug.Log("Initializing all mods...");
+	await ClientHelper.PushCommands();
 
 	// Login as the bot on the discord.
-	tv.ClientHelper.Login(process.env.DISCORD_TOKEN);
-
-	// Activate the webpage for the log
-	const server = new tv.VerseServer();
-	server.StartServer();
+	Debug.Log("Logging into discord account...");
+	await ClientHelper.Login(process.env.DISCORD_TOKEN);
 }
 
-Startup().then(async () => {
 
-	// await new Promise(resolve => setTimeout(resolve, 3000));
+
+Startup().then(() =>
+{
+	Debug.Banner("BgGreen", "Setup Complete");
+
+	process.on("uncaughtException", Debug.Critical);
+
+
+	// await ;
 
 	// FetchTextChannel(Channels.rules_and_info).then(ch => ch.send({
 	// 	embeds: [{

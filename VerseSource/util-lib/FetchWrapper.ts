@@ -1,7 +1,7 @@
 import { Message, TextChannel, GuildBasedChannel, GuildMember, Role, Guild, ButtonInteraction, CacheType, Interaction } from "discord.js";
-import { ClientHelper } from "./ClientCallbackHelpers";
+import { Debug } from "../Logging";
+import { ClientHelper } from "./ClientHelper";
 import { BaseInteraction } from "./types";
-import { Debug } from "./util";
 
 export namespace Fetch
 {
@@ -16,12 +16,12 @@ export namespace Fetch
 				throw new Error("Fetch is returning null.");
 		} catch(e)
 		{
-			Debug.Error(e);
+			Debug.LogError(e);
 			return null;
 		}});
 	}
 
-	export function MessageFromURL(msg_url: string): Promise<Message<boolean>>
+	export function MessageFromURL(msg_url: string | null): Promise<Message<boolean>>
 	{
 		return new Promise(async (resolve, reject) =>
 		{
@@ -62,7 +62,7 @@ export namespace Fetch
 
 			if (msg)
 				resolve(msg);
-			else Debug.Error(new Error("Message should never be null! Promise is not going to resolve..."));
+			else Debug.LogError(new Error("Message should never be null! Promise is not going to resolve..."));
 		});
 	}
 
@@ -76,7 +76,7 @@ export namespace Fetch
 				throw new Error("Fetch is returning null.");
 		} catch(e)
 		{
-			Debug.Error(e);
+			Debug.LogError(e);
 			return null;
 		}});
 	}
@@ -96,7 +96,7 @@ export namespace Fetch
 				throw new Error("Fetch is returning null.");
 		} catch(e)
 		{
-			Debug.Error(e);
+			Debug.LogError(e);
 			return null;
 		}});
 	}
@@ -114,7 +114,7 @@ export namespace Fetch
 				throw new Error("Fetch is returning null.");
 		} catch(e)
 		{
-			Debug.Error(e);
+			Debug.LogError(e);
 			resolve(null);
 		}});
 	}
@@ -131,7 +131,7 @@ export namespace Fetch
 				throw new Error("Fetch is returning null.");
 		} catch(e)
 		{
-			Debug.Error(e);
+			Debug.LogError(e);
 			return null;
 		}});
 	}
@@ -149,7 +149,7 @@ export namespace Fetch
 				throw new Error("Fetch is returning null.");
 		} catch(e)
 		{
-			Debug.Error(e);
+			Debug.LogError(e);
 			return null;
 		}});
 	}
@@ -176,7 +176,7 @@ export namespace Fetch
 			else throw new Error("Fetch is returning null.");
 		} catch(e)
 		{
-			Debug.Error(e);
+			Debug.LogError(e);
 			return null;
 		}});
 	}

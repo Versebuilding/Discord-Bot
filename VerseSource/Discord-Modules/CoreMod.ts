@@ -1,7 +1,113 @@
 import { CacheType, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { DiscordModule } from "./DiscordModule";
-import { Authors, ClientHelper, Debug, EmbeddedPreviewMessage, Fetch, PreviewMessage } from "../util-lib";
+import { Authors, ClientHelper, EmbeddedPreviewMessage, Fetch } from "../util-lib";
+import { Debug } from "../Logging";
+
+/** @module CodeMod This modification adds a few needed commands and a few misc utility. Includes Ping, List Members, and Show Message. */
+
+ClientHelper.reg_cmd(
+	new SlashCommandBuilder()
+		.setName('ping')
+		.setDescription('Replies with Pong!'),
+	OnCMD_Ping
+);
+
+ClientHelper.reg_cmd(
+	new SlashCommandBuilder()
+		.setName('listmembers')
+		.setDescription('Converts any times in given text into Discord timezone commands!')
+		.addRoleOption(option =>
+			option.setName('role')
+				.setDescription('The input to be parsed for times')
+				.setRequired(true)),
+	OnCMD_ListRoleMembers
+);
+
+ClientHelper.reg_cmd(
+	new SlashCommandBuilder()
+		.setName('show-message')
+		.setDescription('Shows a preview of a message link on discord')
+		.addStringOption(option =>
+			option.setName('message-link')
+				.setDescription('The message link/URL to the target message.')
+				.setRequired(true)),
+	OnCMD_MessagePreview
+);
+
+ClientHelper.reg_cmd(
+	new SlashCommandBuilder()
+		.setName('send-embed')
+		.setDescription('Sends an embedded message!')
+		.addChannelOption(option =>
+			option.setName('channel')
+				.setDescription('Channel to send the message.')
+				.setRequired(true))
+		.addStringOption(option =>
+			option.setName('embed')
+				.setDescription('Embed to send with message.')
+				.setRequired(true))
+		.addStringOption(option =>
+			option.setName('button')
+				.setDescription('Button to add to message.')
+				.setRequired(false)),
+	OnCMD_SendEmbed
+);
+
+ClientHelper.reg_cmd(
+	new SlashCommandBuilder()
+		.setName('edit-embed')
+		.setDescription('Edits an embedded message!')
+		.addChannelOption(option =>
+			option.setName('channel')
+				.setDescription('Channel with target message.')
+				.setRequired(true))
+		.addStringOption(option =>
+			option.setName('msg-id')
+				.setDescription('The message that should be editted.')
+				.setRequired(true))
+		.addStringOption(option =>
+			option.setName('embed')
+				.setDescription('Embed to add to message.')
+				.setRequired(true)),
+	OnCMD_EditEmbed
+);
+
+ClientHelper.reg_cmd(
+	new SlashCommandBuilder()
+		.setName('add-button')
+		.setDescription('Edits an embedded message!')
+		.addChannelOption(option =>
+			option.setName('channel')
+				.setDescription('Channel with target message.')
+				.setRequired(true))
+		.addStringOption(option =>
+			option.setName('msg-id')
+				.setDescription('The message that should be editted.')
+				.setRequired(true))
+		.addStringOption(option =>
+			option.setName('custom-id')
+				.setDescription('ID of the button.')
+				.setRequired(true))
+		.addStringOption(option =>
+			option.setName('label')
+				.setDescription('Text that shows on the button.')
+				.setRequired(false))
+		.addStringOption(option =>
+			option.setName('emoji')
+				.setDescription('Emoji that is shown to the left of the button.')
+				.setRequired(false))
+		.addStringOption(option =>
+			option.setName('style')
+				.setDescription('The look of the button')
+				.addChoices(
+					{ value: "PRIMARY", name: "PRIMARY" })
+				.setRequired(false))
+		.addStringOption(option =>
+			option.setName('url')
+				.setDescription('URL that can be click on the right side of the button')
+				.setRequired(false)),
+	OnCMD_AddButton
+);
 
 async function OnCMD_Ping(interaction: CommandInteraction<CacheType>)
 {
@@ -35,7 +141,7 @@ async function OnCMD_SendEmbed(interaction: CommandInteraction<CacheType>)
 	if (embed) try { embedObj.push(new MessageEmbed(JSON.parse(embed))); }
 	catch (error)
 	{
-		console.log(error);
+		Debug.LogError(error);
 		interaction.reply({ embeds: [{ description: "Failed to parse the embed. Check the formating!", author: Authors.Core }, {
 			title: "Embed:",
 			description: embed
@@ -47,7 +153,7 @@ async function OnCMD_SendEmbed(interaction: CommandInteraction<CacheType>)
 	if (tempBtn) try { comps.push(new MessageActionRow().addComponents(new MessageButton(JSON.parse(tempBtn)))); }
 	catch (error)
 	{
-		console.log(error);
+		Debug.LogError(error);
 		interaction.reply({ embeds: [{ description: "Failed to parse the embed. Check the formating!", author: Authors.Core }, {
 			title: "Button:",
 			description: tempBtn
@@ -69,7 +175,6 @@ async function OnCMD_SendEmbed(interaction: CommandInteraction<CacheType>)
 	}
 	catch (error)
 	{
-		console.log(error);
 		Debug.Log("Failed to send message!", error);
 		interaction.reply({ embeds: [{ description: "Could not sent message due to Discord API error!", author: Authors.Core }], ephemeral: true});
 	}
@@ -85,7 +190,7 @@ async function OnCMD_EditEmbed(interaction: CommandInteraction<CacheType>)
 	if (embed) try { embedObj.push(new MessageEmbed(JSON.parse(embed))); }
 	catch (error)
 	{
-		console.log(error);
+		Debug.LogError(error);
 		interaction.reply({ content: "Failed to parse the embed. Check the formating!", embeds: [{
 			title: "Embed:",
 			description: embed
@@ -140,114 +245,4 @@ async function OnCMD_AddButton(interaction: CommandInteraction<CacheType>)
 	const Label = interaction.options.getString("label");
 	const Style = interaction.options.getString("style");
 	const URL = interaction.options.getString("url");
-}
-
-export class CoreMod extends DiscordModule
-{
-	Initialize()
-	{
-		ClientHelper.reg_cmd(
-			new SlashCommandBuilder()
-				.setName('ping')
-				.setDescription('Replies with Pong!'),
-			OnCMD_Ping
-		);
-
-		ClientHelper.reg_cmd(
-			new SlashCommandBuilder()
-				.setName('listmembers')
-				.setDescription('Converts any times in given text into Discord timezone commands!')
-				.addRoleOption(option =>
-					option.setName('role')
-						.setDescription('The input to be parsed for times')
-						.setRequired(true)),
-			OnCMD_ListRoleMembers
-		);
-
-		ClientHelper.reg_cmd(
-			new SlashCommandBuilder()
-				.setName('show-message')
-				.setDescription('Shows a preview of a message link on discord')
-				.addStringOption(option =>
-					option.setName('message-link')
-						.setDescription('The message link/URL to the target message.')
-						.setRequired(true)),
-			OnCMD_MessagePreview
-		);
-
-		ClientHelper.reg_cmd(
-			new SlashCommandBuilder()
-				.setName('send-embed')
-				.setDescription('Sends an embedded message!')
-				.addChannelOption(option =>
-					option.setName('channel')
-						.setDescription('Channel to send the message.')
-						.setRequired(true))
-				.addStringOption(option =>
-					option.setName('embed')
-						.setDescription('Embed to send with message.')
-						.setRequired(true))
-				.addStringOption(option =>
-					option.setName('button')
-						.setDescription('Button to add to message.')
-						.setRequired(false)),
-			OnCMD_SendEmbed
-		);
-
-		ClientHelper.reg_cmd(
-			new SlashCommandBuilder()
-				.setName('edit-embed')
-				.setDescription('Edits an embedded message!')
-				.addChannelOption(option =>
-					option.setName('channel')
-						.setDescription('Channel with target message.')
-						.setRequired(true))
-				.addStringOption(option =>
-					option.setName('msg-id')
-						.setDescription('The message that should be editted.')
-						.setRequired(true))
-				.addStringOption(option =>
-					option.setName('embed')
-						.setDescription('Embed to add to message.')
-						.setRequired(true)),
-			OnCMD_EditEmbed
-		);
-
-		ClientHelper.reg_cmd(
-			new SlashCommandBuilder()
-				.setName('add-button')
-				.setDescription('Edits an embedded message!')
-				.addChannelOption(option =>
-					option.setName('channel')
-						.setDescription('Channel with target message.')
-						.setRequired(true))
-				.addStringOption(option =>
-					option.setName('msg-id')
-						.setDescription('The message that should be editted.')
-						.setRequired(true))
-				.addStringOption(option =>
-					option.setName('custom-id')
-						.setDescription('ID of the button.')
-						.setRequired(true))
-				.addStringOption(option =>
-					option.setName('label')
-						.setDescription('Text that shows on the button.')
-						.setRequired(false))
-				.addStringOption(option =>
-					option.setName('emoji')
-						.setDescription('Emoji that is shown to the left of the button.')
-						.setRequired(false))
-				.addStringOption(option =>
-					option.setName('style')
-						.setDescription('The look of the button')
-						.addChoices(
-							{ value: "PRIMARY", name: "PRIMARY" })
-						.setRequired(false))
-				.addStringOption(option =>
-					option.setName('url')
-						.setDescription('URL that can be click on the right side of the button')
-						.setRequired(false)),
-			OnCMD_AddButton
-		);
-	}
 }

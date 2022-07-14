@@ -1,4 +1,4 @@
-import { AwaitForSeconds, Debug } from "./util";
+import { AwaitForSeconds } from "./util";
 
 export class CustomLock
 {
@@ -49,7 +49,7 @@ export class CustomLock
 		this.resources = rs;
 	}
 
-	static TryAquireKey(key: string): boolean
+	static TryAcquireKey(key: string): boolean
 	{
 		var lock = CustomLock.TempLocks.get(key);
 		if (!lock) lock = new CustomLock(1);
@@ -96,7 +96,7 @@ export class CustomLock
 
 	static async TryHoldKey<T>(key: string, callback: () => Promise<T>, timeout: number = 5000): Promise<T>
 	{
-		if (!CustomLock.TryAquireKey(key))
+		if (!CustomLock.TryAcquireKey(key))
 			throw new Error("Could not get key!");
 	
 		const result = await callback();

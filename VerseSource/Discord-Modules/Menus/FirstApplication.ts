@@ -1,7 +1,8 @@
 import { Awaitable, MessageButton, MessageOptions } from "discord.js";
-import { Authors, Buttons, Delegate, ClientHelper, Fetch, Debug, Channels, BaseInteraction, IconLinks, Roles, FuncAble, ResolveFuncAble, CloseMessage } from "../../util-lib";
-import { isProfileSetup } from "../ProfilesMod";
+import { Debug } from "../../Logging";
+import { Authors, Buttons, Delegate, ClientHelper, Fetch, Channels, BaseInteraction, IconLinks, Roles, FuncAble, ResolveFuncAble, CloseMessage, Profiles } from "../../util-lib";
 import { CommandMenus, HelpMenus } from "./MenuDeclarations";
+import * as assert from "assert";
 
 const backToInfo = HelpMenus.VerseCreatorApplication.RegSwap(HelpMenus.InfoMenu);
 const toProfileSetup = HelpMenus.VerseCreatorApplication.RegSwap(CommandMenus.profileSetup);
@@ -22,7 +23,7 @@ const preAppTasks: {
 	{
 		name: "Setup Verse Profile",
 		desc: "Build a profile containing information about you.",
-		isDone: (i) => isProfileSetup(i.user.id),
+		isDone: (i) => Profiles.isProfileSetup(i.user.id),
 		goto: (i) => CommandMenus.profileSetup.AsyncGetButtonWithId(toProfileSetup, i),
 	},
 	{
@@ -67,7 +68,7 @@ const appQuestions: { name: string, value: string }[] =
 ];
 
 // Modal cannot fit more than 6 questions.
-Debug.Assert(appQuestions.length < 6);
+assert(appQuestions.length < 6);
 
 const appSubmitId = ClientHelper.reg_mdl("Verse-Creator-Application|Submit", async mdl =>
 {
