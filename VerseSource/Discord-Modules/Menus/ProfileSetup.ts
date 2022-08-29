@@ -1,7 +1,7 @@
 import { MessageEmbedOptions, Message, ButtonInteraction, MessageOptions, MessageButton, Interaction } from "discord.js";
 import { Buttons } from "../../util-lib";
 import { ClientHelper } from "../../util-lib/ClientHelper";
-import { Authors, IconLinks } from "../../util-lib/Consts";
+import { Authors, IconLinks } from "../../util-lib/VerseMacros";
 import { Fetch } from "../../util-lib/FetchWrapper";
 import { SheetsHelpers } from "../../util-lib/GoogleAPIs";
 import { Profiles } from "../../util-lib/Profiles";
@@ -175,8 +175,8 @@ const personalInfo: [
 
 	[ "Bio", {
 		title: "👔",
-		description: "Keep it short, but give a little overview of who you are. What are your most impressive skills and accomplishments? How does the work at the Verse Inspire you? What are your favorite things? Be creative and remember that this will go on your company profile.\n\n*This is limited to 2500 characters, keep it short and sweet.*",
-	}, (msg) => msg.content.length < 2501 ? (msg.content.length > 15 ? null : "Your answer is too short to be a bio (min is 16 characters)") : "Sorry but to make sure we can fit all of your information onto your profile, we capped bios to 2500 characters. Try condensing some of your information"
+		description: "Keep it short, but give a little overview of who you are. For examples: What are your most impressive skills and accomplishments? How does the work at the Verse Inspire you? What are your favorite things? Be creative and remember that this will go on your company profile.\n\n*This is limited to 1000 characters, keep it about 2-3 sentences. Short and sweet.*",
+	}, (msg) => msg.content.length < 1001 ? (msg.content.length > 15 ? null : "Your answer is too short to be a bio (min is 16 characters)") : "Sorry but to make sure we can fit all of your information onto your profile, we capped bios to 1000 characters. Try condensing some of your information"
 	],
 
 	[ "GitHub Username", {
@@ -202,7 +202,7 @@ CommandMenus.profileSetup.exitMessage = async (i) =>
 
 const profileSetupSave = ClientHelper.reg_btn("ProfileSetup|Save", async i =>
 {
-	await CloseMessage(i);
+	await CloseMessage(i, true);
 });
 
 CommandMenus.profileSetup.menu = async (interaction: Interaction) =>

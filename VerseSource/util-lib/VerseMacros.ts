@@ -1,3 +1,16 @@
+import { EmbedAuthorData, EmbedAuthorOptions } from "@discordjs/builders";
+
+/**
+ * The Verse Macros (constant/final/define/readonly).
+ * This defines the constant information that is used throughout the bot.
+ * @module VerseMacros
+ */
+export namespace VM
+{
+	export const ChronicleBotId = "903380664336928798";
+}
+
+
 export const IconLinks =
 {
 	Application: "https://cutewallpaper.org/24/prepare-clipart/34529268.jpg",
@@ -8,9 +21,21 @@ export const IconLinks =
 	Warning: "https://www.safetysign.com/images/source/medium-images/J6520.png",
 	Check: "https://uxwing.com/wp-content/themes/uxwing/download/48-checkmark-cross/success-green-check-mark.png",
 	Vote: "https://icons.iconarchive.com/icons/iconarchive/blue-election/1024/Election-Vote-icon.png",
+	Gratitude: "https://www.advancementfoundation.org/gratitude-icon.png",
+	Spotify: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Spotify_icon.svg/1982px-Spotify_icon.svg.png",
+	Discussion: "https://usindo.org/assets/up/2017/07/open-forum-icon.png",
+	MusicCloud: "https://pngroyale.com/wp-content/uploads/2021/12/Download-free-Cloud-Music-icon-PNG.png",
+	Deezer: "https://24365withblinks.com/images/icons/deezer.png",
+	GoogleCalendar: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Calendar_icon_%282020%29.svg/1024px-Google_Calendar_icon_%282020%29.svg.png",
 }
 
-export const Authors = {
+export const Authors =
+{
+	Success: {
+		name: "Success",
+		iconURL: IconLinks.Check,
+	},
+
 	Help: {
 		name: "Help Bot!",
 		iconURL: IconLinks.Info
@@ -22,23 +47,23 @@ export const Authors = {
 	},
 
 	Application: {
-		icon_url: IconLinks.Application,
+		iconURL: IconLinks.Application,
 		name: "Application"
 	},
 
 	Warning: {
-		icon_url: IconLinks.Warning,
+		iconURL: IconLinks.Warning,
 		name: "Warning!"
 	},
 
 	Error: {
-		icon_url: IconLinks.Error,
+		iconURL: IconLinks.Error,
 		name: "Error!"
 	},
 
 	Vote: {
 		name: "Vote",
-		icon_url: IconLinks.Vote,
+		iconURL: IconLinks.Vote,
 	},
 
 	LinkCap: {
@@ -50,6 +75,22 @@ export const Authors = {
 		iconURL: "https://cdn-icons-png.flaticon.com/512/5146/5146077.png",
 		name: "Role Assign"
 	},
+
+	Shoutout: {
+		name: "Shoutout",
+		iconURL: IconLinks.Discussion,
+	},
+
+	Deezer: {
+		name: "Deezer",
+		iconURL: IconLinks.Deezer,
+		url: "https://www.deezer.com/",
+	},
+
+	Calendar: {
+		name: "Calendar Helper",
+		iconURL: IconLinks.GoogleCalendar,
+	},
 }
 
 export const Channels = 
@@ -60,6 +101,8 @@ export const Channels =
 	bot_setup: "849353615222898709",
 	announcements: "979244080494182430",
 	bot_log: "978188746564468746",
+	event_notifications: "979310872772112404",
+	team_communication: "979266090398007318",
 }
 
 export const Roles =

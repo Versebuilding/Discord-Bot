@@ -2,6 +2,7 @@ import { ButtonInteraction, MessageButton, EmojiIdentifierResolvable, MessageAct
 import { Debug } from "../Logging";
 import { ClientHelper } from "./ClientHelper";
 import { PartialButtonOptions } from "./types";
+import * as assert from "assert";
 
 export const Buttons =
 {
@@ -56,11 +57,24 @@ export const Buttons =
 		});
 	},
 
+	GetBestRowLength: (numberOfButtons: number) =>
+		(numberOfButtons <= 3) ? 5 :
+		(numberOfButtons == 4) ? 2 :
+		(numberOfButtons <= 6) ? 3 :
+		(numberOfButtons <= 8) ? 4 :
+		(numberOfButtons == 10) ? 5 :
+		(numberOfButtons <= 12) ? 4 :
+		(numberOfButtons <= 15) ? 5 :
+		(numberOfButtons == 16) ? 4 :
+		5,
+
 	ToRows: (btn: MessageButton) => [new MessageActionRow().addComponents(btn)],
 	ButtonsToRows: (...buttons: MessageButton[]) => Buttons.AddButtonsToRows([...buttons], []),
+	NiceButtonsToRows: (...buttons: MessageButton[]) =>
+		Buttons.ButtonsToLimitedRows([...buttons], Buttons.GetBestRowLength(buttons.length)),
 	ButtonsToLimitedRows: (buttons: MessageButton[], rowLimit: number): MessageActionRow[] =>
 	{
-		(rowLimit > 0 && rowLimit < 5);
+		assert(rowLimit > 0 && rowLimit < 6);
 		const comps: MessageActionRow[] = [];
 
 		for(var i = 0; i < Math.ceil(buttons.length / rowLimit); i++)
@@ -80,17 +94,6 @@ export const Buttons =
 		});
 		return comps;
 	},
-
-	GetBestRowLength: (numberOfButtons: number) =>
-		(numberOfButtons <= 3) ? 5 :
-		(numberOfButtons == 4) ? 2 :
-		(numberOfButtons <= 6) ? 3 :
-		(numberOfButtons <= 8) ? 4 :
-		(numberOfButtons == 10) ? 5 :
-		(numberOfButtons <= 12) ? 4 :
-		(numberOfButtons <= 15) ? 5 :
-		(numberOfButtons == 16) ? 4 :
-		5,
 
 	NullCall: "null call",
 	NotImplemented: "not implemented",

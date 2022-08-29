@@ -61,14 +61,14 @@ export namespace Debug
 
 		args.forEach(str =>{
 			console.log(prefix + str);
-			log += prefix + str + "\n";
+			log += (prefix + str + "\n").replace(/\[[0-9]+m/g, "");
 		});
 
 		if (printStack)
 		{
 			var append = stack.substring(stack.indexOf("\n    ")) + "\n";
 			console.log(append);
-			log += append + "\n";
+			log += (append + "\n").replace(/\[[0-9]+m/g, "");
 		}
 
 		const trimto = log.length - config.logLength;
@@ -144,6 +144,7 @@ export namespace Debug
 		return "";
 	}
 
+	export function LogInline(...args: any[]) { _print([toStrings(args).join("")]); }
 	export function Log(...args: any[]) { _print(toStrings(args)); }
 	export function Print(...args: any[]) { _print(toStrings(args)); }
 

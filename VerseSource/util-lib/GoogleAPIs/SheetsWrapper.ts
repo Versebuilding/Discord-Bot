@@ -6,6 +6,29 @@ import { GoogleClient } from "./GoogleClient";
 
 export namespace SheetsHelpers
 {
+	export async function Clear(sheetname: string = "Sheet1", docID?: string)
+	{
+		if (!docID) docID = process.env.GOOGLE_DATA_DOCUMENT;
+		return (await GoogleClient.SheetsClient.spreadsheets.values.update({
+			auth: GoogleClient.auth,
+			spreadsheetId: docID,
+			range: sheetname + `!A2:ZZZ5000`,
+			valueInputOption: "USER_ENTERED",
+			requestBody: { values: [ [ ] ]},
+		})).data;
+	}
+
+	export async function Read(params: sheets_v4.Params$Resource$Spreadsheets$Values$Get):
+		Promise<string[][]>
+	{
+		if (!params.auth) params.auth = GoogleClient.auth;
+		if (!params.spreadsheetId) params.spreadsheetId = process.env.GOOGLE_DATA_DOCUMENT;
+		if (!params.range) params.range = "Sheet1";
+
+		return (await GoogleClient.SheetsClient.spreadsheets.values.get(params)).data.values;
+	}
+
+
 	export async function ReadCell(row: number, col: string, sheetname: string = "Sheet1", docID?: string): Promise<any | null>
 	{
 		if (!docID) docID = process.env.GOOGLE_DATA_DOCUMENT;
@@ -73,6 +96,17 @@ export namespace SheetsHelpers
 			valueInputOption: "USER_ENTERED",
 			requestBody: { values: [ values ]},
 		})).data;
+	}
+
+	export async function Update(params: sheets_v4.Params$Resource$Spreadsheets$Values$Update):
+			Promise<sheets_v4.Schema$UpdateValuesResponse>
+	{
+		if (!params.auth) params.auth = GoogleClient.auth;
+		if (!params.spreadsheetId) params.spreadsheetId = process.env.GOOGLE_DATA_DOCUMENT;
+		if (!params.range) params.range = "Sheet1";
+		if (!params.valueInputOption) params.valueInputOption = "USER_ENTERED";
+
+		return (await GoogleClient.SheetsClient.spreadsheets.values.update(params)).data;
 	}
 
 	export async function AppendRow({ values, sheetname = "Sheet1", docID }:

@@ -3,6 +3,7 @@ import { ButtonInteraction, EmbedField, EmojiIdentifierResolvable, MessageEmbed,
 import { BaseInteraction, Buttons, ClientHelper, CloseMessage, Fetch, MessageData, SendConfirmation, Authors, FuncAble, ResolveFuncAble, PartialButtonOptions } from "../../util-lib";
 import * as assert from "assert";
 import { Debug } from "../../Logging";
+import { oauth2 } from "googleapis/build/src/apis/oauth2";
 
 type RegisterOptions = "NONE" | "OPEN" | "DMOPEN" | "OPEN+DMOPEN";
 
@@ -96,14 +97,13 @@ export class MessageMenu
 	/** Binds this to MessageMenu.DMOpen() and adds an interaction reply. */
 	JustDMOpen(): (i: BaseInteraction) => Promise<void>
 	{
-		
 		assert(this.regFlags == "DMOPEN" || this.regFlags == "OPEN+DMOPEN");
 		var _this = this;
 		return async (i) => {
 
-			const def_promise = i.isCommand() ?
-				i.deferReply() :
-				i.deferUpdate();
+			const def_promise = i.isButton() ?
+				i.deferUpdate() :
+				i.deferReply({ ephemeral: true });
 			
 			await Promise.all([
 				_this.DMOpen(i),
@@ -111,7 +111,7 @@ export class MessageMenu
 			]);
 
 			if (i.isCommand())
-				await i.deleteReply();
+				await i.followUp("Menu opened!");
 		};
 	}
 

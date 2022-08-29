@@ -1,5 +1,5 @@
 import { ButtonInteraction, EmbedFieldData, MessageButton, MessageEmbedOptions } from "discord.js";
-import { ClientHelper, AskTextQuestion, FetchMessageFromURL, Channels, EmbeddedPreviewMessage, SendConfirmation, Debug, ProfileColumnHeaders, Buttons, FetchMember, ToColor, FetchTextChannel, Authors } from "../../util-lib";
+import { ClientHelper, AskTextQuestion, FetchMessageFromURL, Channels, EmbeddedPreviewMessage, SendConfirmation, ProfileColumnHeaders, Buttons, FetchMember, ToColor, FetchTextChannel, Authors } from "../../util-lib";
 import { GetLinksFromString } from "../LinkCaptureMod";
 import { MessageMenu } from "./MessageMenu";
 

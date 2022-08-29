@@ -3,6 +3,20 @@
 		"**/node_modules": false
 	},
 	"cSpell.words": [
-		"DMOPEN"
-	]
+		"ated",
+		"Deezer",
+		"DMOPEN",
+		"Shoutout",
+		"shoutouts",
+		"TVAPI",
+		"VAPI"
+	],
+	"editor.tokenColorCustomizations": {
+        "textMateRules": [
+          {
+            "scope": "variable.other.constant",
+            "settings": { "foreground": "#3e86d8" }
+          },
+        ]
+    }
 }

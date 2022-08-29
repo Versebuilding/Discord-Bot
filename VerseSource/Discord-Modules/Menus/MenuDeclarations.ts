@@ -41,4 +41,12 @@ export namespace CommandMenus
 	export const profileSetup = new MessageMenu(
 		{ name: "Set Personal Information", desc: "Fill out basic info for your public company profile.", emoji: "<:name_tag:986290647189291008>", regFlags: "DMOPEN" }
 	);
+
+	export const StandUp = new MessageMenu(
+		{ name: "Create Standup", desc: "Create an update card for a project.", emoji: "<:name_tag:986290647189291008>", regFlags: "DMOPEN" }
+	);
+
+	export const eventCreator = new MessageMenu(
+		{ name: "Create Event", desc: "Create an event for the Google Calendar.", emoji: "📅", regFlags: "DMOPEN" }
+	);
 }

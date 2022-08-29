@@ -1,7 +1,6 @@
 import { CacheType, Client, CommandInteraction, Interaction, Message } from "discord.js";
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { DiscordModule } from "./DiscordModule";
-import { ClientHelper, Debug, MessageReactionCallback, RemoveReactionFromMsg } from "../util-lib";
+import { SlashCommandBuilder } from '@discordjs/builders';\
+import { ClientHelper, MessageReactionCallback, RemoveReactionFromMsg } from "../util-lib";
 const adp = require("any-date-parser");
 
 /**

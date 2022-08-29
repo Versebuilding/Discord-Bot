@@ -209,10 +209,13 @@ async function PollButton(btn: ButtonInteraction)
 		replace = val.split("\n").filter((n) =>
 			n != name((index))
 		).join("\n");
+
+		Debug.Log(`${btn.user.username} un-voted for '${content.embeds[0].fields[index].name}'`);
 	}
 	else
 	{
 		replace = val + "\n" + name(index);
+		Debug.Log(`${btn.user.username} voted for '${content.embeds[0].fields[index].name}'`);
 	}
 
 	replace = "Vote Count: `" + (replace.split("\n").length - 1) + "`" + replace;

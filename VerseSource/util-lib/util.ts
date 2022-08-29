@@ -1,11 +1,11 @@
 import { APIEmbed, APIMessage } from 'discord-api-types/v9';
-import { Message, Client, CacheType, ButtonInteraction, MessageActionRow, MessageButton, EmojiResolvable, Util, CollectorFilter, MessageReaction, User, Collection, MessageOptions, InteractionCollector, MessageComponentInteraction, MessageComponentCollectorOptions, CollectorResetTimerOptions, PartialTextBasedChannelFields, MessageEmbed, MessageEmbedOptions, MessageActionRowComponent, MessagePayload, MessageEditOptions, Awaitable, ColorResolvable } from "discord.js";
+import { Message, Client, CacheType, ButtonInteraction, MessageActionRow, MessageButton, EmojiResolvable, Util, CollectorFilter, MessageReaction, User, Collection, MessageOptions, InteractionCollector, MessageComponentInteraction, MessageComponentCollectorOptions, CollectorResetTimerOptions, PartialTextBasedChannelFields, MessageEmbed, MessageEmbedOptions, MessageActionRowComponent, MessagePayload, MessageEditOptions, Awaitable, ColorResolvable, Interaction, InteractionReplyOptions } from "discord.js";
 import { InterfaceType, readBuilderProgram } from 'typescript';
 import { Debug } from '../Logging';
 import { CustomLock } from './AsyncLock';
 import { ClientHelper } from './ClientHelper';
 import { Fetch } from "./FetchWrapper";
-import { FuncAble } from './types';
+import { BaseInteraction, FuncAble } from './types';
 const path = require('node:path');
 
 
@@ -103,8 +103,8 @@ export async function MessageReactionCallback(msg: Message<boolean>, emoji: Emoj
 {
 	await msg.react(emoji);
 
-	const rfilter: CollectorFilter<[MessageReaction, User]> = (reaction, user) => {
-		return (EmojiEquals(reaction.emoji, emoji)) && (user.id != ClientHelper.client.user.id);
+	const rfilter: CollectorFilter<[MessageReaction, User]> = async (reaction, user) => {
+		return (await EmojiEquals(reaction.emoji, emoji)) && (user.id != ClientHelper.client.user.id);
 	};
 
 	msg.awaitReactions(
@@ -181,6 +181,37 @@ export async function ConfirmButtonInteraction(button: ButtonInteraction<CacheTy
 				resolve(false);
 			}
 		});
+	});
+}
+
+export function AwaitButtonFollowup(interaction: BaseInteraction, options: InteractionReplyOptions): Promise<ButtonInteraction>
+{
+	if (!options.components) throw new Error("No components provided.");
+
+	options.ephemeral = true;
+	options.fetchReply = true;
+	
+
+	return new Promise(async resolve =>
+	{
+		var rpl: Message<boolean>;
+		try
+		{
+			if (!interaction.replied && !interaction.deferred)
+			{
+				await interaction.reply(options);
+				rpl = await interaction.fetchReply() as Message;
+			}
+		}
+		catch (error)
+		{
+			
+		}
+
+		if (!rpl) rpl = await interaction.followUp(options) as Message<boolean>;
+	
+		const collect = rpl.createMessageComponentCollector({ time: 3000000 });
+		collect.on("collect", resolve);
 	});
 }
 
@@ -299,11 +330,13 @@ export function AwaitForSeconds<T>(promise: Promise<T>): Promise<T>
 	]);
 }
 
-export async function CloseMessage(button: ButtonInteraction<CacheType>): Promise<boolean | unknown>
+export async function CloseMessage(button: ButtonInteraction<CacheType>, respond = false): Promise<boolean | unknown>
 {
 	try {
 		let msg = await Fetch.ButtonMessage(button);
-		await CustomLock.WaitToHoldKey(msg.id, () => msg.delete());
+		await CustomLock.WaitToHoldKey(msg.id, async () => await msg.delete());
+		if (respond)
+			await button.deferUpdate();
 		return true;
 	} catch {
 		Debug.Log("Message already deleted. Probably two buttons clicked at once. Breaking.");
@@ -432,7 +465,7 @@ export async function AskTextQuestion({
 				continue; // If ask again...
 			else
 			{
-				a == null;
+				a = null;
 				break;
 			}
 		}

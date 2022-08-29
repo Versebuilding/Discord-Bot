@@ -1,6 +1,6 @@
 import { CacheType, CommandInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, TextChannel } from "discord.js";
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Authors, ClientHelper, EmbeddedPreviewMessage, Fetch } from "../util-lib";
+import { Authors, ClientHelper, EmbeddedPreviewMessage, Fetch, Filters, msToTime } from "../util-lib";
 import { Debug } from "../Logging";
 
 /** @module CodeMod This modification adds a few needed commands and a few misc utility. Includes Ping, List Members, and Show Message. */
@@ -10,6 +10,13 @@ ClientHelper.reg_cmd(
 		.setName('ping')
 		.setDescription('Replies with Pong!'),
 	OnCMD_Ping
+);
+
+ClientHelper.reg_cmd(
+	new SlashCommandBuilder()
+		.setName('bot-stats')
+		.setDescription('Replies with Pong!'),
+	OnCMD_BotStats
 );
 
 ClientHelper.reg_cmd(
@@ -31,7 +38,8 @@ ClientHelper.reg_cmd(
 			option.setName('message-link')
 				.setDescription('The message link/URL to the target message.')
 				.setRequired(true)),
-	OnCMD_MessagePreview
+	OnCMD_MessagePreview,
+	Filters.iModeratorAuth()
 );
 
 ClientHelper.reg_cmd(
@@ -171,7 +179,7 @@ async function OnCMD_SendEmbed(interaction: CommandInteraction<CacheType>)
 	try
 	{
 		await channelObj.send({ embeds: embedObj, components: comps });
-		interaction.reply({ embeds: [{ description: "Message has been sent!", author: Authors.Core }], ephemeral: true});
+		await interaction.reply({ embeds: [{ description: "Message has been sent!", author: Authors.Core }], ephemeral: true});
 	}
 	catch (error)
 	{
@@ -245,4 +253,21 @@ async function OnCMD_AddButton(interaction: CommandInteraction<CacheType>)
 	const Label = interaction.options.getString("label");
 	const Style = interaction.options.getString("style");
 	const URL = interaction.options.getString("url");
+}
+
+async function OnCMD_BotStats(cmd: CommandInteraction<CacheType>)
+{
+	await cmd.reply({
+		embeds: [{
+			author: Authors.Core,
+			color: "DARK_GREY",
+			title: "Bot Stats",
+			description: [
+				["Uptime", msToTime(ClientHelper.client.uptime)],
+				["Total Uses", ClientHelper.GetUses(null)],
+				...ClientHelper.GetAllUses()
+			].map(([key, value]) => `**${key}**: ${value}`).join("\n"),
+		}],
+		ephemeral: true
+	});
 }

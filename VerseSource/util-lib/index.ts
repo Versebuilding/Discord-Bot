@@ -3,7 +3,7 @@ export * from "./util";
 export * from "./GoogleAPIs";
 export * from "./FetchWrapper";
 export * from "./AsyncLock";
-export * from "./Consts";
+export * from "./VerseMacros";
 export * from "./Buttons";
 export * from "./Filters";
 export * from "./ClientHelper";

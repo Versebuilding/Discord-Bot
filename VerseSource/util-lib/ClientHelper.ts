@@ -1,10 +1,11 @@
 import { Routes } from "discord-api-types/v9";
-import { CommandInteraction, ButtonInteraction, ClientEvents, Awaitable, Client, Interaction, Intents, ModalSubmitInteraction } from "discord.js";
+import { CommandInteraction, ButtonInteraction, ClientEvents, Awaitable, Client, Interaction, Intents, ModalSubmitInteraction, Message } from "discord.js";
 import { CustomLock } from "./AsyncLock";
 import { Filters } from "./Filters";
 import { BaseInteraction, Delegate, SlashCommand } from "./types";
 import * as assert from "assert";
 import { Debug } from "../Logging";
+import { Authors } from "./VerseMacros";
 
 export interface CallbackOptions<K extends keyof ClientEvents>
 {
@@ -15,7 +16,20 @@ export interface CallbackOptions<K extends keyof ClientEvents>
 interface ClientEventListeners<K extends keyof ClientEvents>
 {
 	key: K,
+	numOfCalls: number,
 	values: CallbackOptions<K>[];
+}
+
+async function FilterListeners<K extends keyof ClientEvents>(listeners: ClientEventListeners<K>, ...args: ClientEvents[K]):
+	Promise<CallbackOptions<K>[]>
+{
+	var result: CallbackOptions<K>[] = [];
+	for await (const callback of listeners.values)
+	{
+		if (!callback.filter || await callback.filter(...args))
+			result.push(callback);
+	}
+	return result;
 }
 
 export class ClientHelper
@@ -32,7 +46,9 @@ export class ClientHelper
 	}
 
 	static loggedIn: boolean = false;
+	static crashed: boolean = false;
 	static client: Client = null;
+	static numberOfUses: number = 0;
 	private static listeners: ClientEventListeners<any>[] = [];
 
 	static slashCommands: SlashCommand[] = [];
@@ -50,8 +66,7 @@ export class ClientHelper
 		let listener = ClientHelper.listeners.find(l => l.key == event);
 		if (listener) listener.values.push(options);
 		else
-			ClientHelper.BindEvent(event)
-				.values.push(options);
+			ClientHelper.BindEvent(event).values.push(options);
 	}
 
 	private static commandNames = new Set<string>();
@@ -127,60 +142,175 @@ export class ClientHelper
 
 	static BindEvent<K extends keyof ClientEvents>(x: K): ClientEventListeners<K>
 	{
-		let listeners: ClientEventListeners<K> = { key: x, values: [] };
+		let listeners: ClientEventListeners<K> = { key: x, numOfCalls: 0, values: [] };
 		ClientHelper.listeners.push(listeners);
 
 		if (x == "interactionCreate") 
 			ClientHelper.client.on(x, async (...args) =>
 			{
-				let i = args[0] as Interaction;
+				if (ClientHelper.crashed) return;
 
-				if ((i.isButton() || i.isModalSubmit()))
+				ClientHelper.OnUse(listeners);
+
+				let interaction = args[0] as Interaction;
+
+				if ((interaction.isButton() || interaction.isModalSubmit()))
 				{
-					const btnKey = i.message?.id ?? i.customId;
+					const btnKey = interaction.message?.id ?? interaction.customId;
 					if (CustomLock.TryAcquireKey(btnKey))
 					{
-						try {
-							const matches = listeners.values.filter(l => !l.filter || l.filter(...args));
-	
-							for await (const l of matches)
-								await l.execute(...args);
+						try
+						{
+							const callbacks = await FilterListeners(listeners, ...args);
+							for await (const callback of callbacks)
+								await callback.execute(...args);
 
 						} catch (err) {
 							Debug.LogError(err);
-							if (!i.replied && !i.deferred)
-								await i.reply({ content: "There was an internal error!", ephemeral: true })
-									.catch(() => (i as BaseInteraction).followUp({ content: "There was an internal error!", ephemeral: true })).catch(Debug.LogError);
+							if (!interaction.replied && !interaction.deferred)
+								await interaction.reply({
+									embeds: [{
+										author: Authors.Error,
+										description: "There was an internal error!",
+									}],
+									ephemeral: true
+								}).catch(() =>
+									(interaction as BaseInteraction).followUp({
+										embeds: [{
+											author: Authors.Error,
+											description: "There was an internal error!",
+										}],
+										ephemeral: true
+									})).catch(Debug.LogError);
 						}
 	
-						// if (!i.replied && !i.deferred)
-						// {
-						// 	Debug.Warning("Button with id '" + i.customId + "' did not have a response.");
-						// 	await i.reply({
-						// 		content: "Button does not have a response! This is most likely due to an bot update or a bug! If you think this is a bug, please reach out to the moderators on discord.",
-						// 		ephemeral: true
-						// 	});
-						// }
+						if (!interaction.replied && !interaction.deferred)
+						{
+							Debug.LogWarning("Button/Modal with id '" + interaction.customId + "' did not have a response.");
+							await interaction.reply({
+								embeds: [{
+									author: Authors.Error,
+									description: "Button/Modal does not have a response! This is most likely due to a bug with the bot, but could also be a privilege error! If you think this is a bug, please reach out to the moderators on discord.",
+								}],
+								ephemeral: true
+							}).catch(e =>
+							{
+								Debug.LogError("The button was replied/deferred but did not await the response.");
+							});
+						}
 
 						CustomLock.ReleaseKey(btnKey);
 					}
-					else i.reply({
-						content: "Button is already trying to respond (try again)!",
+					else interaction.reply({
+						embeds: [{
+							author: Authors.Error,
+							description: "Button is already trying to respond (try again)!",
+						}],
 						ephemeral: true
 					});
 				}
+				else if (interaction.isCommand())
+				{
+					const callbacks = await FilterListeners(listeners, ...args);
+					for await (const callback of callbacks)
+						await callback.execute(...args);
+					
+					if (!interaction.replied && !interaction.deferred)
+					{
+						Debug.LogWarning("Command with name '" + interaction.commandName + "' did not have a response.");
+						await interaction.reply({
+							embeds: [{
+								author: Authors.Error,
+								description: "You do not have permissions to access this command! *If you think this is a bug, please reach out to the moderators on discord.*",
+							}],
+							ephemeral: true
+						}).catch(e =>
+						{
+							Debug.LogError("The command was replied/deferred but did not await the response.");
+						});
+					}
+				}
 				else
-					listeners.values.filter(l => !l.filter || l.filter(...args))
-						.forEach(l => l.execute(...args));
+				{
+					Debug.LogError("Create Interaction not compatible with implemented interactions: ", interaction);
+				}
+				Debug.LogEvent(x + " ended");
 			});
 		else
-			ClientHelper.client.on(x, (...args) =>
+			ClientHelper.client.on(x, async (...args) =>
 			{
-				listeners.values.filter(l => !l.filter || l.filter(...args))
-					.forEach(l => l.execute(...args));
+				if (ClientHelper.crashed) return;
+				ClientHelper.OnUse(listeners);
+				const callbacks = await FilterListeners(listeners, ...args);
+				for await (const callback of callbacks)
+					await callback.execute(...args);
+
+				if (x == "messageCreate" && (args[0] as Message).author.bot)
+					return;
+
+				Debug.LogEvent(x + " ended");
 			});
 
 		return listeners;
+	}
+
+	public static GetUses<K extends keyof ClientEvents>(key: K | null): number
+	{
+		if (key)
+			return ClientHelper.listeners.find(l => l.key == key)?.numOfCalls ?? 0;
+		else
+			return ClientHelper.numberOfUses;
+	}
+
+	public static GetAllUses(): [keyof ClientEvents, number][]
+	{
+		return ClientHelper.listeners.map(l => [l.key, l.numOfCalls]);
+	}
+	
+	public static readonly onlineEvents: (keyof ClientEvents)[] = [
+		"messageCreate",
+		"messageUpdate",
+		"interactionCreate",
+		"messageDelete",
+		"voiceStateUpdate",
+		"guildMemberAdd",
+		"guildMemberRemove",
+		"threadCreate",
+	];
+
+	private static OnUse<K extends keyof ClientEvents>(listeners: ClientEventListeners<K>)
+	{
+		listeners.numOfCalls++;
+		ClientHelper.numberOfUses++;
+
+		if (ClientHelper.nextUseListeners.length != 0)
+		{
+			if (ClientHelper.onlineEvents.find(k => k == listeners.key))
+			{
+				ClientHelper.nextUseListeners.forEach(c => c(listeners.key));
+				ClientHelper.nextUseListeners = [];
+			}
+		}
+	}
+
+	static ForceCrash()
+	{
+		if (ClientHelper.crashed) return;
+
+		ClientHelper.crashed = true;
+		ClientHelper.crashListeners.forEach(c => c());
+	}
+
+	private static nextUseListeners: Delegate<[keyof ClientEvents]>[] = [];
+	static OnNextUse(callback: Delegate<[keyof ClientEvents]>)
+	{
+		ClientHelper.nextUseListeners.push(callback);
+	}
+
+	private static crashListeners: (() => void)[] = [];
+	static OnCrash(callback: (() => void))
+	{
+		ClientHelper.crashListeners.push(callback);
 	}
 
 	static async PushCommands()
@@ -221,4 +351,6 @@ ClientHelper.client = new Client({ intents: [
 	Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
 	Intents.FLAGS.DIRECT_MESSAGES,
 	Intents.FLAGS.GUILD_INVITES,
+	Intents.FLAGS.GUILD_VOICE_STATES,
+	Intents.FLAGS.GUILD_PRESENCES,
 ]});

@@ -22,9 +22,9 @@ ClientHelper.on("ready", async() => {
 });
 
 const cmds = GetCommands();
-ClientHelper.reg_cmd(cmds[0], OnCMD_RoleMessage);
-ClientHelper.reg_cmd(cmds[1], OnCMD_AddRole);
-ClientHelper.reg_cmd(cmds[2], OnCMD_RefreshRoleMessages);
+ClientHelper.reg_cmd(cmds[0], OnCMD_RoleMessage, Filters.iModeratorAuth());
+ClientHelper.reg_cmd(cmds[1], OnCMD_AddRole, Filters.iModeratorAuth());
+ClientHelper.reg_cmd(cmds[2], OnCMD_RefreshRoleMessages, Filters.iModeratorAuth());
 
 ClientHelper.on("interactionCreate", OnBtn_RoleReact,
 	b => b.isButton() &&

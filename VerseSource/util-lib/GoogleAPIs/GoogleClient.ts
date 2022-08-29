@@ -1,10 +1,11 @@
 import { GoogleAuth } from "google-auth-library";
 import { JSONClient } from "google-auth-library/build/src/auth/googleauth";
-import { sheets_v4, google } from "googleapis";
+import { sheets_v4, google, calendar_v3 } from "googleapis";
 
 export namespace GoogleClient
 {
 	export var SheetsClient: sheets_v4.Sheets;
+	export var CalendarClient: calendar_v3.Calendar;
 	export var auth: GoogleAuth<JSONClient>;
 
 	export async function Initialize()
@@ -17,5 +18,6 @@ export namespace GoogleClient
 
 		const authClientObject = await auth.getClient();
 		SheetsClient = google.sheets({ version: "v4", auth: authClientObject });
+		CalendarClient = google.calendar({ version: 'v3', auth: authClientObject });
 	}
 }

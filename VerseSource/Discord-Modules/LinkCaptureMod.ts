@@ -1,11 +1,9 @@
 import { CacheType, CommandInteraction, Message, MessageButton, MessageEmbedOptions } from "discord.js";
-import { Authors, Buttons, ClientHelper, COMMON_REGEXPS, CreateMCCWithFooterTimer, CustomLock, Fetch, GetLinksFromString, GetNumberEmoji, MessageReactionCallback, RemoveReactionFromMsg, SheetsHelpers } from "../util-lib"
+import { Authors, Buttons, ClientHelper, COMMON_REGEXPS, CreateMCCWithFooterTimer, CustomLock, Fetch, Filters, GetLinksFromString, GetNumberEmoji, MessageReactionCallback, RemoveReactionFromMsg, SheetsHelpers } from "../util-lib"
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Debug } from "../Logging";
 
-ClientHelper.on("messageCreate", OnMessage,
-	m => !m.author.bot && m.channel.type != "DM"
-);
+ClientHelper.on("messageCreate", OnMessage, Filters.mIsNotBot());
 
 ClientHelper.reg_cmd(
 	new SlashCommandBuilder()
@@ -59,36 +57,44 @@ async function CreateInteractableLinkReply(msg: Message<boolean>, links: RegExpM
 
 	var nums: number[] = [];
 
-	collector.on("collect", i => {
+	collector.on("collect", async i => {
 		Debug.Log("Collected button reaction on message");
-		try { if (i.isButton())
+		try
 		{
-			nums.push(parseInt(i.customId));
-			(comps[Math.floor(parseInt(i.customId) / 5)]
-				.components[parseInt(i.customId) % 5] as MessageButton)
+			if (i.isButton())
+			{
+				nums.push(parseInt(i.customId));
+			
+				(comps[Math.floor(parseInt(i.customId) / 5)]
+					.components[parseInt(i.customId) % 5] as MessageButton)
 					.setDisabled(true)
 					.setStyle("SUCCESS");
 
-			SheetsHelpers.AppendRow({ values: [
-				channelName, "",
-				`=HYPERLINK("${msg.url}","${msg.author.username}")`,
-				i.user.username,
-				msg.content,
-				links[i.customId]
-			], sheetname: "Chat Links", docID: "1UHZBH9bjRuR1dnUsH6UcVL-KpYPTBp00AD4L_9SW5ZI" });
+				await SheetsHelpers.AppendRow({
+					values: [
+						channelName, "",
+						`=HYPERLINK("${msg.url}","${msg.author.username}")`,
+						i.user.username,
+						msg.content,
+						links[i.customId]
+					], sheetname: "Chat Links", docID: "1UHZBH9bjRuR1dnUsH6UcVL-KpYPTBp00AD4L_9SW5ZI"
+				});
 
-			collector.resetTimer();
-			CustomLock.WaitToHoldKey(replym.id, () => 
-				replym.edit({ embeds: [embed], components: comps }))
-			.then(() => {
-				i.reply({ embeds: [{
-					title: "Link was posted",
-					description: "Check out the links posted in [Chat Links > Bot Dump](https://docs.google.com/spreadsheets/d/1UHZBH9bjRuR1dnUsH6UcVL-KpYPTBp00AD4L_9SW5ZI/edit#gid=1566372611&range=A13:G13) on the Master Directory Document",
-					author: Authors.LinkCap
-				}], ephemeral: true });
-			});
-		}} catch {
-			i.reply({ content: "The was an issue posting the link to the sheets!", ephemeral: true });
+				collector.resetTimer();
+				await CustomLock.WaitToHoldKey(replym.id, async () =>
+				{
+					await replym.edit({ embeds: [embed], components: comps });
+					await i.reply({
+						embeds: [{
+							title: "Link was posted",
+							description: "Check out the links posted in [Chat Links > Bot Dump](https://docs.google.com/spreadsheets/d/1UHZBH9bjRuR1dnUsH6UcVL-KpYPTBp00AD4L_9SW5ZI/edit#gid=1566372611&range=A13:G13) on the Master Directory Document",
+							author: Authors.LinkCap
+						}], ephemeral: true
+					});
+				});
+			}
+		} catch {
+			await i.reply({ content: "The was an issue posting the link to the sheets!", ephemeral: true }).then(Debug.LogError);
 		}
 	});
 
